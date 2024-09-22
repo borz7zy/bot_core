@@ -2,6 +2,8 @@
 #define _CORE_HXX
 
 #include <logprint.hxx>
+#include "minor_scripts.hxx"
+#include "main_script.hxx"
 
 extern "C"
 {
@@ -13,7 +15,7 @@ extern "C"
 class Core
 {
 public:
-    Core(const char *scrPath) : LogsCore("CORE", "./core.logs"), scriptPath(scrPath)
+    Core(const char *scrPath) : LogsCore("CORE", "./core.log"), scriptPath(scrPath)
     {
         L = luaL_newstate();
         if (L == nullptr)
@@ -23,28 +25,9 @@ public:
         }
         luaL_openlibs(L);
 
-        if (luaL_loadfile(L, scriptPath) || lua_pcall(L, 0, LUA_MULTRET, 0))
-        {
-            logger->LOGE("Error opening LUAC: %s", lua_tostring(L, -1));
-            lua_pop(L, 1);
-            return;
-        }
+        // minor
 
-        lua_getglobal(L, "main");
-        if (lua_isfunction(L, -1))
-        {
-            if (lua_pcall(L, 0, LUA_MULTRET, 0) != LUA_OK)
-            {
-                logger->LOGE("Error calling main function: %s", lua_tostring(L, -1));
-                lua_pop(L, 1);
-                return;
-            }
-        }
-        else
-        {
-            logger->LOGE("The main function is not defined in the script!");
-            return;
-        }
+        // main
 
         logger->LOGI("The core was initialized successfully.");
     }
@@ -59,8 +42,10 @@ public:
 
 private:
     lua_State *L;
+
     logprint LogsCore;
     logprint *logger = &LogsCore;
+
     const char *scriptPath;
 };
 
