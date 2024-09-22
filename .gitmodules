@@ -1,0 +1,6 @@
+[submodule "libs/logprint"]
+	path = libs/logprint
+	url = https://github.com/borz7zy/logprint_lib
+[submodule "libs/third_party/lua"]
+	path = libs/third_party/lua
+	url = https://github.com/lua/lua
