@@ -29,6 +29,15 @@ public:
         }
         luaL_openlibs(L);
 
+        lua_pushnil(L);
+        lua_setglobal(L, "io");
+        lua_pushnil(L);
+        lua_setglobal(L, "os");
+        lua_pushnil(L);
+        lua_setglobal(L, "package");
+
+        lua_register(L, "load_module", safe_require);
+
         loadMinor();
 
         loadMain();
@@ -52,6 +61,8 @@ private:
 
     std::vector<std::string> minorScripts;
     std::string mainScript;
+
+    static int safe_require(lua_State *L);
 
     void loadMinor();
     void loadMain();
