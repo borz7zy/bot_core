@@ -16,6 +16,7 @@ void MainScript::load(lua_State *L, const char *script)
         {
             logger->LOGE("Error calling main function: %s", lua_tostring(L, -1));
             lua_pop(L, 1);
+            unload(L, script);
             return;
         }
     }

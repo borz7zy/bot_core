@@ -20,11 +20,11 @@ public:
     {
     }
     void load(lua_State *L, const char *script);
-    void unload(lua_State *L, const char *script);
     void callFunction(lua_State *L, const char *script, const char *functionName);
 
 private:
     logprint *logger;
+    void unload(lua_State *L, const char *script);
 };
 
 #endif

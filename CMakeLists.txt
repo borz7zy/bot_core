@@ -68,7 +68,10 @@ add_library(lua::header ALIAS lua-header)
 
 set(BOT_SRC
     main.cxx
+    config_manager.cxx
     core.cxx
+    minor_scripts.cxx
+    main_script.cxx
     ${LOGPRINT_LIB}/logprint.cpp
 )
 

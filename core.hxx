@@ -4,6 +4,8 @@
 #include <logprint.hxx>
 #include "minor_scripts.hxx"
 #include "main_script.hxx"
+#include <vector>
+#include <string>
 
 extern "C"
 {
@@ -15,7 +17,9 @@ extern "C"
 class Core
 {
 public:
-    Core(const char *scrPath) : LogsCore("CORE", "./core.log"), scriptPath(scrPath)
+    Core(std::vector<std::string> minScripts, std::string maScript) : LogsCore("CORE", "./core.log"),
+                                                                      minorScripts(minScripts),
+                                                                      mainScript(maScript)
     {
         L = luaL_newstate();
         if (L == nullptr)
@@ -25,9 +29,9 @@ public:
         }
         luaL_openlibs(L);
 
-        // minor
+        loadMinor();
 
-        // main
+        loadMain();
 
         logger->LOGI("The core was initialized successfully.");
     }
@@ -46,7 +50,11 @@ private:
     logprint LogsCore;
     logprint *logger = &LogsCore;
 
-    const char *scriptPath;
+    std::vector<std::string> minorScripts;
+    std::string mainScript;
+
+    void loadMinor();
+    void loadMain();
 };
 
 #endif
