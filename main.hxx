@@ -53,11 +53,6 @@ public:
             ++tick_count;
 
             std::this_thread::sleep_until(next_tick_time);
-
-            if (tick_count % 100 == 0)
-            {
-                analyzePerformance();
-            }
         }
     }
 
@@ -67,14 +62,6 @@ public:
     }
 
 private:
-    void analyzePerformance()
-    {
-        double average_execution_time = total_execution_time / tick_count;
-        std::cout << "Performance Analysis after " << tick_count << " ticks:" << std::endl;
-        std::cout << "  - Average execution time per tick: " << average_execution_time << " ms" << std::endl;
-        std::cout << "  - Total execution time: " << total_execution_time << " ms" << std::endl;
-    }
-
     int ticks_per_second;
     int tick_duration;
     bool running = true;
