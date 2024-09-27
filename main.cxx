@@ -28,8 +28,8 @@ int main()
         Core c(fullMinorScripts, mainScriptFullPath);
         Core *core = &c;
 
-        TickSys tickSys(20, tick_update); // 20 тиков в секунду
-        tickSys.start();                  // Бесконечный запуск системы тиков
+        TickSys tickSys(ticks, tick_update);
+        tickSys.start();
     }
 
     return 0;
