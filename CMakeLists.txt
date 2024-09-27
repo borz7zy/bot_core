@@ -3,7 +3,7 @@ project(bot_core)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED True)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(LIBS_PATH ${CMAKE_SOURCE_DIR}/libs)
@@ -70,6 +70,8 @@ set(BOT_SRC
     main.cxx
     config_manager.cxx
     core.cxx
+    lua_natives.cxx
+    plugin_manager.cxx
     minor_scripts.cxx
     main_script.cxx
     ${LOGPRINT_LIB}/logprint.cpp
@@ -80,4 +82,4 @@ target_include_directories(bot_core PRIVATE
     ${LOGPRINT_LIB}
     ${LUA_INCLUDE_DIR}
 )
-target_link_libraries(bot_core PRIVATE lua lua::header)
+target_link_libraries(bot_core PRIVATE lua::lib lua::header)
