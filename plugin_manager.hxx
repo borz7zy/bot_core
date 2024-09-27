@@ -17,13 +17,13 @@ public:
     ~PluginManager();
 
     void LoadPlugins(const std::string &directory);
+    void UnloadAll();
+    bool CallFunction(const std::string &functionName);
 
 private:
     std::vector<void *> loadedLibraries;
 
     void *LoadLibrary(const std::string &path);
-
-    void UnloadAll();
 };
 
 #endif

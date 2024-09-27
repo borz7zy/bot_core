@@ -87,3 +87,32 @@ void PluginManager::UnloadAll()
     }
     loadedLibraries.clear();
 }
+
+bool PluginManager::CallFunction(const std::string &functionName)
+{
+    for (auto lib : loadedLibraries)
+    {
+#ifdef _WIN32
+        FARPROC proc = ::GetProcAddress(static_cast<HMODULE>(lib), functionName.c_str());
+        if (proc)
+        {
+            typedef void (*FuncType)();
+            FuncType func = reinterpret_cast<FuncType>(proc);
+            func();
+            return true;
+        }
+#else
+        void *func = dlsym(lib, functionName.c_str());
+        if (func)
+        {
+            typedef void (*FuncType)();
+            FuncType funcPtr = reinterpret_cast<FuncType>(func);
+            funcPtr();
+            return true;
+        }
+#endif
+    }
+
+    logs->LOGE("Function %s not found in any loaded library.", functionName.c_str());
+    return false;
+}
