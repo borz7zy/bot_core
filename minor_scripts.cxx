@@ -4,6 +4,7 @@ void MinorScripts::load(lua_State *L, const char *script)
 {
     lua_newtable(L);
     lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
     lua_setglobal(L, script);
 
     if (luaL_loadfile(L, script) != LUA_OK)

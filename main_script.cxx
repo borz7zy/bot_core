@@ -2,6 +2,13 @@
 
 void MainScript::load(lua_State *L, const char *script)
 {
+    lua_newtable(L);
+
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+
+    lua_setglobal(L, script);
+
     if (luaL_loadfile(L, script) || lua_pcall(L, 0, LUA_MULTRET, 0))
     {
         logger->LOGE("Error opening LUAC: %s", lua_tostring(L, -1));
