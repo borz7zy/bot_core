@@ -32,35 +32,50 @@ public:
                                   tickSys(tickpeersecond, [this]()
                                           { tick_update(); })
     {
-        L = luaL_newstate();
-        if (L == nullptr)
-        {
-            logger->LOGE("Core initialization error: Lua could not allocate state");
-            return;
-        }
-        luaL_openlibs(L);
 
-        lua_pushnil(L);
-        lua_setglobal(L, "io");
-        lua_pushnil(L);
-        lua_setglobal(L, "os");
-        lua_pushnil(L);
-        lua_setglobal(L, "package");
+        for (const auto &minorScript : minorScripts)
+        {
+            preloadStates(minorScript.c_str());
+        }
+
+        preloadStates(mainScript.c_str());
 
         pluginManager.LoadPlugins(plPath);
 
         loadedLibraries = pluginManager.GetLoadedLibraries();
 
-        for (const auto &[plugin, name] : loadedLibraries)
+        for (const auto &stateInfo : luaStates)
         {
-            luaNatives.CallGetNatives(L, plugin, name.c_str());
+            for (const auto &[plugin, name] : loadedLibraries)
+            {
+                luaNatives.CallGetNatives(stateInfo.L, plugin, name.c_str());
+            }
+
+            lua_register(stateInfo.L, "load_module", safe_require);
         }
 
-        lua_register(L, "load_module", safe_require);
+        for (const auto &minorScript : minorScripts)
+        {
+            try
+            {
+                lua_State *state = getStateFromVector(minorScript.c_str());
+                loadMinor(state, minorScript.c_str());
+            }
+            catch (const std::runtime_error &e)
+            {
+                logger->LOGE("Error while searching state for script %s: %s", minorScript.c_str(), e.what());
+            }
+        }
 
-        loadMinor();
-
-        loadMain();
+        try
+        {
+            lua_State *state = getStateFromVector(mainScript.c_str());
+            loadMain(state);
+        }
+        catch (const std::runtime_error &e)
+        {
+            logger->LOGE("Error while searching state for script %s: %s", mainScript.c_str(), e.what());
+        }
 
         logger->LOGI("The core was initialized successfully.");
 
@@ -68,15 +83,23 @@ public:
     }
     ~Core()
     {
-        if (L)
+        for (const auto &stateInfo : luaStates)
         {
-            lua_close(L);
+            if (stateInfo.L)
+            {
+                lua_close(stateInfo.L);
+            }
         }
         logger->LOGI("Shutting down the core.");
     }
 
 private:
-    lua_State *L;
+    struct LuaStateInfo
+    {
+        lua_State *L;
+        const char *script;
+    };
+    std::vector<LuaStateInfo> luaStates;
 
     logprint LogsCore;
     logprint *logger = &LogsCore;
@@ -88,17 +111,23 @@ private:
 
     PluginManager pluginManager;
 
+    void preloadStates(const char *script);
+    lua_State *getStateFromVector(const char *script);
+
     std::vector<std::pair<void *, std::string>> loadedLibraries;
 
     LuaNatives luaNatives;
+
+    void callUpdatePlugin(void *plugin);
+    void callUpdateInScript(const char *script);
 
     void tick_update();
     TickSys tickSys;
 
     static int safe_require(lua_State *L);
 
-    void loadMinor();
-    void loadMain();
+    void loadMinor(lua_State *L, const char *minorScript);
+    void loadMain(lua_State *L);
 };
 
 #endif
