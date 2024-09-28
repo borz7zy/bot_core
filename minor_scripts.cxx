@@ -7,15 +7,12 @@ void MinorScripts::load(lua_State *L, const char *script)
     lua_setfield(L, -2, "__index");
     lua_setglobal(L, script);
 
-    if (luaL_loadfile(L, script) != LUA_OK)
+    if (luaL_loadfile(L, script) || lua_pcall(L, 0, LUA_MULTRET, 0))
     {
         logger->LOGE("Error loading minor script %s: %s", script, lua_tostring(L, -1));
         lua_pop(L, 1);
         return;
     }
-
-    lua_pushvalue(L, -1);
-    lua_setglobal(L, script);
 }
 
 void MinorScripts::unload(lua_State *L, const char *script)
