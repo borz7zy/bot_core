@@ -4,8 +4,11 @@
 #include <logprint.hxx>
 #include "minor_scripts.hxx"
 #include "main_script.hxx"
+#include "plugin_manager.hxx"
+#include "lua_natives.hxx"
 #include <vector>
 #include <string>
+#include <iostream>
 
 extern "C"
 {
@@ -17,9 +20,10 @@ extern "C"
 class Core
 {
 public:
-    Core(std::vector<std::string> minScripts, std::string maScript) : LogsCore("CORE", "./core.log"),
-                                                                      minorScripts(minScripts),
-                                                                      mainScript(maScript)
+    Core(std::string pPath, std::vector<std::string> minScripts, std::string maScript) : LogsCore("CORE", "./core.log"),
+                                                                                         minorScripts(minScripts),
+                                                                                         mainScript(maScript),
+                                                                                         plPath(pPath)
     {
         L = luaL_newstate();
         if (L == nullptr)
@@ -35,6 +39,15 @@ public:
         lua_setglobal(L, "os");
         lua_pushnil(L);
         lua_setglobal(L, "package");
+
+        pluginManager.LoadPlugins(plPath);
+
+        loadedLibraries = pluginManager.GetLoadedLibraries();
+
+        for (const auto &[plugin, name] : loadedLibraries)
+        {
+            luaNatives.CallGetNatives(L, plugin, name.c_str());
+        }
 
         lua_register(L, "load_module", safe_require);
 
@@ -59,8 +72,16 @@ private:
     logprint LogsCore;
     logprint *logger = &LogsCore;
 
+    std::string plPath;
+
     std::vector<std::string> minorScripts;
     std::string mainScript;
+
+    PluginManager pluginManager;
+
+    std::vector<std::pair<void *, std::string>> loadedLibraries;
+
+    LuaNatives luaNatives;
 
     static int safe_require(lua_State *L);
 
