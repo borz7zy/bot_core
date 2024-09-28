@@ -15,13 +15,17 @@ void LuaNatives::CallGetNatives(lua_State *L, void *plugin, const char *lib_name
 #endif
     if (!registerNatives)
     {
-        // std::cerr << "Failed to get RegisterNatives function: " << (handle ? dlerror() : GetLastError()) << std::endl;
+#ifdef _WIN32
+        logger->LOGE("Failed to get RegisterNatives function: %s", GetLastError());
+#else
+        logger->LOGE("Failed to get RegisterNatives function: %s", dlerror());
+#endif
         return;
     }
     Native_Function_List *nativeList = registerNatives();
     if (!nativeList)
     {
-        // std::cerr << "RegisterNatives returned null!" << std::endl;
+        logger->LOGE("RegisterNatives returned null!");
         return;
     }
     for (int i = 0; nativeList[i].nativeName != nullptr; ++i)
