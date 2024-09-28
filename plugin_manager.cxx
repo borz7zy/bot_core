@@ -63,16 +63,16 @@ void *PluginManager::LoadLibrary(const std::string &path)
     HMODULE hLib = ::LoadLibraryA(path.c_str());
     if (!hLib)
     {
-        logs->LOGE("Error loading plugin: %s", GetLastError());
+        DWORD errorCode = GetLastError();
+        LPVOID lpMsgBuf;
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR)&lpMsgBuf, 0, NULL);
+        logs->LOGE("Error loading plugin: %s", (char *)lpMsgBuf);
+        LocalFree(lpMsgBuf);
     }
     return hLib;
-#elif __APPLE__
-    void *handle = dlopen(path.c_str(), RTLD_LAZY);
-    if (!handle)
-    {
-        logs->LOGE("Error loading plugin: %s", dlerror());
-    }
-    return handle;
 #else
     void *handle = dlopen(path.c_str(), RTLD_LAZY);
     if (!handle)
