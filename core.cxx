@@ -1,5 +1,11 @@
 #include "core.hxx"
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
 int Core::safe_require(lua_State *L)
 {
     const char *module_name = lua_tostring(L, 1);
@@ -43,13 +49,28 @@ void Core::loadMain(lua_State *L)
 void Core::callUpdatePlugin(void *plugin)
 {
     typedef void (*VoidFunction)();
-    VoidFunction func = (VoidFunction)dlsym(plugin, "update_ticks");
+    VoidFunction func = nullptr;
+
+#ifdef _WIN32
+    HMODULE hModule = static_cast<HMODULE>(plugin);
+    func = (VoidFunction)GetProcAddress(hModule, "update_ticks");
+
+    if (!func)
+    {
+        DWORD error = GetLastError();
+        std::cerr << "Failed to get function address: " << error << std::endl;
+        return;
+    }
+#else
+    func = (VoidFunction)dlsym(plugin, "update_ticks");
 
     const char *dlsym_error = dlerror();
     if (dlsym_error)
     {
+        std::cerr << "Failed to get function address: " << dlsym_error << std::endl;
         return;
     }
+#endif
 
     func();
 }
