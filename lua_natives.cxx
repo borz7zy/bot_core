@@ -16,7 +16,14 @@ void LuaNatives::CallGetNatives(lua_State *L, void *plugin, const char *lib_name
     if (!registerNatives)
     {
 #ifdef _WIN32
-        logger->LOGE("Failed to get RegisterNatives function: %s", GetLastError());
+        DWORD errorCode = GetLastError();
+        LPVOID lpMsgBuf;
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR)&lpMsgBuf, 0, NULL);
+        logger->LOGE("Failed to get RegisterNatives function: %s", (char *)lpMsgBuf);
+        LocalFree(lpMsgBuf);
 #else
         logger->LOGE("Failed to get RegisterNatives function: %s", dlerror());
 #endif
