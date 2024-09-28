@@ -42,3 +42,7 @@ void Core::loadMain()
 
     main->load(L, mainScript.c_str());
 }
+
+void Core::tick_update()
+{
+}

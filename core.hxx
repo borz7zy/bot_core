@@ -6,6 +6,7 @@
 #include "main_script.hxx"
 #include "plugin_manager.hxx"
 #include "lua_natives.hxx"
+#include "tick_sys.hxx"
 #include <vector>
 #include <string>
 #include <iostream>
@@ -20,10 +21,16 @@ extern "C"
 class Core
 {
 public:
-    Core(std::string pPath, std::vector<std::string> minScripts, std::string maScript) : LogsCore("CORE", "./core.log"),
-                                                                                         minorScripts(minScripts),
-                                                                                         mainScript(maScript),
-                                                                                         plPath(pPath)
+    Core(
+        std::string pPath,
+        std::vector<std::string> minScripts,
+        std::string maScript,
+        uint8_t tickpeersecond) : LogsCore("CORE", "./core.log"),
+                                  minorScripts(minScripts),
+                                  mainScript(maScript),
+                                  plPath(pPath),
+                                  tickSys(tickpeersecond, [this]()
+                                          { tick_update(); })
     {
         L = luaL_newstate();
         if (L == nullptr)
@@ -56,6 +63,8 @@ public:
         loadMain();
 
         logger->LOGI("The core was initialized successfully.");
+
+        tickSys.start();
     }
     ~Core()
     {
@@ -82,6 +91,9 @@ private:
     std::vector<std::pair<void *, std::string>> loadedLibraries;
 
     LuaNatives luaNatives;
+
+    void tick_update();
+    TickSys tickSys;
 
     static int safe_require(lua_State *L);
 
