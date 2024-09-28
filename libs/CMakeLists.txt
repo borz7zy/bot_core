@@ -57,7 +57,11 @@ set(LUA_HEADERS
 add_library(logprint STATIC ${LOGPRINT_LIB}/logprint.cpp)
 
 add_library(lua STATIC ${LUA_BUILD})
-target_compile_options(lua PRIVATE -O2 -std=c99)
+if (WIN32)
+    target_compile_options(lua PRIVATE /std:c99)
+else()
+    target_compile_options(lua PRIVATE -O2 -std=c99)
+endif()
 
 set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
 file(COPY ${LUA_HEADERS} DESTINATION ${LUA_INCLUDE_DIR})
