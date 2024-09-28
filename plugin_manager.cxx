@@ -3,6 +3,14 @@
 #include <iostream>
 #include <filesystem>
 #include <logprint.hxx>
+#include <any>
+#include <vector>
+#include <stdexcept>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
 
 namespace fs = std::filesystem;
 
@@ -38,7 +46,7 @@ void PluginManager::LoadPlugins(const std::string &directory)
                 void *libHandle = LoadLibrary(filePath);
                 if (libHandle)
                 {
-                    loadedLibraries.push_back(libHandle);
+                    loadedLibraries.emplace_back(libHandle, filePath);
                 }
                 else
                 {
@@ -77,7 +85,7 @@ void *PluginManager::LoadLibrary(const std::string &path)
 
 void PluginManager::UnloadAll()
 {
-    for (auto lib : loadedLibraries)
+    for (const auto &[lib, name] : loadedLibraries)
     {
 #ifdef _WIN32
         ::FreeLibrary(static_cast<HMODULE>(lib));
@@ -88,31 +96,7 @@ void PluginManager::UnloadAll()
     loadedLibraries.clear();
 }
 
-bool PluginManager::CallFunction(const std::string &functionName)
+std::vector<std::pair<void *, std::string>> PluginManager::GetLoadedLibraries()
 {
-    for (auto lib : loadedLibraries)
-    {
-#ifdef _WIN32
-        FARPROC proc = ::GetProcAddress(static_cast<HMODULE>(lib), functionName.c_str());
-        if (proc)
-        {
-            typedef void (*FuncType)();
-            FuncType func = reinterpret_cast<FuncType>(proc);
-            func();
-            return true;
-        }
-#else
-        void *func = dlsym(lib, functionName.c_str());
-        if (func)
-        {
-            typedef void (*FuncType)();
-            FuncType funcPtr = reinterpret_cast<FuncType>(func);
-            funcPtr();
-            return true;
-        }
-#endif
-    }
-
-    logs->LOGE("Function %s not found in any loaded library.", functionName.c_str());
-    return false;
+    return loadedLibraries;
 }

@@ -18,10 +18,10 @@ public:
 
     void LoadPlugins(const std::string &directory);
     void UnloadAll();
-    bool CallFunction(const std::string &functionName);
+    std::vector<std::pair<void *, std::string>> GetLoadedLibraries();
 
 private:
-    std::vector<void *> loadedLibraries;
+    std::vector<std::pair<void *, std::string>> loadedLibraries;
 
     void *LoadLibrary(const std::string &path);
 };
