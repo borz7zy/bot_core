@@ -69,6 +69,7 @@ add_library(lua::header ALIAS lua-header)
 set(BOT_SRC
     main.cxx
     config_manager.cxx
+    tick_sys.cxx
     core.cxx
     lua_natives.cxx
     plugin_manager.cxx
