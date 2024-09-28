@@ -5,6 +5,7 @@
 #else
 #include <dlfcn.h>
 #endif
+#include <cstring>
 
 int Core::safe_require(lua_State *L)
 {
