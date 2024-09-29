@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <logprint.hxx>
+#include <string>
 
 class ConfigManager
 {
@@ -16,6 +17,7 @@ public:
     }
     bool load(const char *filename);
     std::string get(const char *key) const;
+    bool generateConfig();
 
 private:
     std::unordered_map<std::string, std::string> config;
@@ -34,6 +36,8 @@ private:
             str.clear();
         }
     }
+    bool directoryExists(const std::string &path);
+    void createDirectoryIfNotExists(const std::string &path);
 };
 
 #endif

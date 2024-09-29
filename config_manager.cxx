@@ -1,5 +1,8 @@
 #include "config_manager.hxx"
 #include <fstream>
+#include <sys/stat.h>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 bool ConfigManager::load(const char *filename)
 {
@@ -53,4 +56,56 @@ std::string ConfigManager::get(const char *key) const
     }
 
     return "";
+}
+
+bool ConfigManager::directoryExists(const std::string &path)
+{
+    struct stat info;
+    if (stat(path.c_str(), &info) != 0)
+    {
+        return false;
+    }
+    return (info.st_mode & S_IFDIR) != 0;
+}
+
+void ConfigManager::createDirectoryIfNotExists(const std::string &path)
+{
+    if (!directoryExists(path))
+    {
+        fs::create_directory(path);
+    }
+}
+
+bool ConfigManager::generateConfig()
+{
+    const char *filename = "bot_core.conf";
+
+    std::ofstream configFile(filename);
+
+    if (!configFile)
+    {
+        logger->LOGE("Error: failed to create a file %s", filename);
+        return false;
+    }
+
+    configFile << "# Example config for bot core\n";
+    configFile << "# Attention! the core only works with pre-compiled lua scripts ( luac )\n";
+    configFile << "#\n";
+    configFile << "main_script_path=./botscripts # the path to the main script\n";
+    configFile << "minor_scripts_path=./minorscripts # the path to secondary scripts\n";
+    configFile << "plugins_path=./plugins # the path to the plugins\n";
+    configFile << "minor_scripts=test_minor.luac # all secondary scripts are indicated here, separated by a space, indicating the extension\n";
+    configFile << "main_script=script.luac # a single script is specified here, also with the extension\n";
+    configFile << "ticks=20 # the number of ticks per second. to poll the plugin and scripts\n";
+    configFile << "#\n";
+    configFile << "# you can also specify your fields here, if your script needs it.\n";
+
+    configFile.close();
+
+    createDirectoryIfNotExists("./botscripts");
+    createDirectoryIfNotExists("./minorscripts");
+    createDirectoryIfNotExists("./plugins");
+    createDirectoryIfNotExists("./modules");
+
+    return true;
 }

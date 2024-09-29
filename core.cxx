@@ -1,11 +1,22 @@
 #include "core.hxx"
-
+#include <iostream>
 #ifdef _WIN32
 #include <windows.h>
 #else
 #include <dlfcn.h>
 #endif
 #include <cstring>
+#include <sstream>
+
+void Core::processScripts(const std::string &scripts, const std::string &basePath, std::vector<std::string> &output)
+{
+    std::istringstream iss(scripts);
+    std::string script;
+    while (iss >> script)
+    {
+        output.push_back(basePath + "/" + script);
+    }
+}
 
 int Core::safe_require(lua_State *L)
 {

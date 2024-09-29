@@ -2,6 +2,7 @@
 #define _CORE_HXX
 
 #include <logprint.hxx>
+#include "config_manager.hxx"
 #include "minor_scripts.hxx"
 #include "main_script.hxx"
 #include "plugin_manager.hxx"
@@ -9,7 +10,6 @@
 #include "tick_sys.hxx"
 #include <vector>
 #include <string>
-#include <iostream>
 
 extern "C"
 {
@@ -21,17 +21,33 @@ extern "C"
 class Core
 {
 public:
-    Core(
-        std::string pPath,
-        std::vector<std::string> minScripts,
-        std::string maScript,
-        uint8_t tickpeersecond) : LogsCore("CORE", "./core.log"),
-                                  minorScripts(minScripts),
-                                  mainScript(maScript),
-                                  plPath(pPath),
-                                  tickSys(tickpeersecond, [this]()
-                                          { tick_update(); })
+    Core() : LogsCore("CORE", "./core.log")
     {
+        if (config->load("./bot_core.conf"))
+        {
+            std::string mainScriptPath = config->get("main_script_path");
+            std::string misPath = config->get("minor_scripts_path");
+            plPath = config->get("plugins_path");
+
+            std::string minScripts = config->get("minor_scripts");
+            std::string mainScriptNP = config->get("main_script");
+            ticks = std::stoi(config->get("ticks"));
+
+            processScripts(minScripts, misPath, minorScripts);
+
+            mainScript = mainScriptPath + "/" + mainScriptNP;
+        }
+        else
+        {
+            if (config->generateConfig())
+            {
+                logger->LOGI("Directories and a standard config were generated. Please configure the config and run the core again!");
+            }
+            return;
+        }
+
+        TickSys tickSys(ticks, [this]()
+                        { tick_update(); });
 
         for (const auto &minorScript : minorScripts)
         {
@@ -94,6 +110,11 @@ public:
     }
 
 private:
+    void processScripts(const std::string &scripts, const std::string &basePath, std::vector<std::string> &output);
+
+    ConfigManager cManager;
+    ConfigManager *config = &cManager;
+
     struct LuaStateInfo
     {
         lua_State *L;
@@ -118,11 +139,12 @@ private:
 
     LuaNatives luaNatives;
 
+    uint8_t ticks;
+
     void callUpdatePlugin(void *plugin);
     void callUpdateInScript(const char *script);
 
     void tick_update();
-    TickSys tickSys;
 
     static int safe_require(lua_State *L);
 
