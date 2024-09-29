@@ -20,7 +20,8 @@ cd bot_core
 ```
 
 ### Download
-You can download the release version for the OS you need (from the existing ones downloaded in the release, respectively) in the [releases](https://github.com/borz7zy/bot_core/releases) section
+You can download the release version for the OS you need (from the existing ones downloaded in the release, respectively) in the [releases](https://github.com/borz7zy/bot_core/releases) section.
+
 You can also find the latest builds in the project's [Actions](https://github.com/borz7zy/bot_core/actions/workflows/cmake-multi-platform.yml)
 If there is nothing for your platform anywhere, you can build it yourself using the instructions below.
 
