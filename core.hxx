@@ -10,6 +10,7 @@
 #include "tick_sys.hxx"
 #include <vector>
 #include <string>
+#include <stdexcept>
 
 extern "C"
 {
