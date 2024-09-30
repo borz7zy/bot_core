@@ -60,13 +60,13 @@ void *PluginManager::LoadLibrary(const std::string &path)
     HMODULE hLib = ::LoadLibraryA(path.c_str());
     if (!hLib)
     {
-        DWORD errorCode = GetLastError();
+        int errorCode = static_cast<int>(GetLastError());
         LPVOID lpMsgBuf;
         FormatMessage(
             FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
             NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
             (LPTSTR)&lpMsgBuf, 0, NULL);
-        logp->printlf("Error loading plugin: %s", (char *)lpMsgBuf);
+        logp->printlf("Error loading plugin: %d - %s", errorCode, (char *)lpMsgBuf); // Изменено здесь
         LocalFree(lpMsgBuf);
     }
     return hLib;
