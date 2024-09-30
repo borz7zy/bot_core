@@ -1,6 +1,5 @@
 /build/
 /experiments/
 .vscode/
-/compiler/
 
 .DS_Store

@@ -11,14 +11,16 @@ if (WIN32)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message(STATUS "Building in Debug mode")
+    message(STATUS "Building bot core in Debug mode")
     add_definitions(-DDEBUG)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    message(STATUS "Building in Release mode")
+    message(STATUS "Building bot core in Release mode")
     add_definitions(-DRELEASE)
 endif()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/compiler)
 
 set(BOT_SRC
     main.cxx
