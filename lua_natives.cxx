@@ -16,13 +16,13 @@ void LuaNatives::CallGetNatives(lua_State *L, void *plugin, const char *lib_name
     if (!registerNatives)
     {
 #ifdef _WIN32
-        DWORD errorCode = GetLastError();
+        int errorCode = static_cast<int>(GetLastError());
         LPVOID lpMsgBuf;
         FormatMessage(
             FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
             NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
             (LPTSTR)&lpMsgBuf, 0, NULL);
-        logp->printlf("Failed to get RegisterNatives function: %s", (char *)lpMsgBuf);
+        logp->printlf("Failed to get RegisterNatives function: %d - %s", errorCode, (char *)lpMsgBuf);
         LocalFree(lpMsgBuf);
 #else
         logp->printlf("Failed to get RegisterNatives function: %s", dlerror());
@@ -30,9 +30,12 @@ void LuaNatives::CallGetNatives(lua_State *L, void *plugin, const char *lib_name
         return;
     }
     Native_Function_List *nativeList = registerNatives();
+
     if (!nativeList)
     {
+#ifdef DEBUG
         logp->printlf("RegisterNatives returned null!");
+#endif
         return;
     }
     for (int i = 0; nativeList[i].nativeName != nullptr; ++i)

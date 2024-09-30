@@ -155,8 +155,14 @@ void Core::callUpdatePlugin(void *plugin)
 
     if (!func)
     {
-        DWORD error = GetLastError();
-        std::cerr << "Failed to get function address: " << error << std::endl;
+        int errorCode = static_cast<int>(GetLastError());
+        LPVOID lpMsgBuf;
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR)&lpMsgBuf, 0, NULL);
+        logp->printlf("Failed to get function address: %d - %s", errorCode, (char *)lpMsgBuf);
+        LocalFree(lpMsgBuf);
         return;
     }
 #else
@@ -165,7 +171,7 @@ void Core::callUpdatePlugin(void *plugin)
     const char *dlsym_error = dlerror();
     if (dlsym_error)
     {
-        std::cerr << "Failed to get function address: " << dlsym_error << std::endl;
+        logp->printlf("Failed to get function address: %s", dlsym_error);
         return;
     }
 #endif
@@ -190,6 +196,11 @@ void Core::preloadStates(const char *script)
 
     luaL_requiref(L, "table", luaopen_table, 1);
     lua_pop(L, 1);
+
+#ifdef DEBUG
+    luaL_requiref(L, "debug", luaopen_debug, 1);
+    lua_pop(L, 1);
+#endif
 
     LuaStateInfo stateInfo;
     stateInfo.L = L;
@@ -227,7 +238,9 @@ void Core::callUpdateInScript(const char *script)
     lua_getglobal(L, "UpdateTicks");
     if (lua_isnil(L, -1))
     {
-        // logp->printlf("Function UpdateTicks not found in %s", script);
+#ifdef DEBUG
+        logp->printlf("Function UpdateTicks not found in %s", script);
+#endif
         lua_pop(L, 1);
         return;
     }
@@ -237,7 +250,9 @@ void Core::callUpdateInScript(const char *script)
         if (lua_pcall(L, 0, 0, 0) != LUA_OK)
         {
             const char *error = lua_tostring(L, -1);
+#ifdef DEBUG
             logp->printlf("Error calling UpdateTicks on %s: %s", script, error);
+#endif
             lua_pop(L, 1);
         }
     }

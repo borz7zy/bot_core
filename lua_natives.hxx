@@ -9,9 +9,6 @@
 class LuaNatives
 {
 public:
-    LuaNatives() {}
-    ~LuaNatives() {}
-
     void CallGetNatives(lua_State *L, void *plugin, const char *lib_name);
 };
 

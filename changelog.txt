@@ -1,7 +1,8 @@
 -b0.1.1 (29 sep 2024 - ?)
-    Config and paths are now created automatically if the config was not found in the root folder
-    Replaced heavy log library with simple one
-    in lua_State from standard libraries now only "string, math, table" is loaded
+    - Config and paths are now created automatically if the config was not found in the root folder
+    - Replaced heavy log library with simple one
+    - in lua_State from standard libraries now only "string, math, table" is loaded
+    - bug fixes
 -b0.1.0 (28 sep 2024)
     First beta release!
     build logs: https://github.com/borz7zy/bot_core/actions/runs/11087594299
