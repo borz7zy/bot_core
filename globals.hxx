@@ -5,4 +5,8 @@
 #include "logger.hxx"
 extern logger *logp;
 
+// config_manager
+#include "config_manager.hxx"
+extern ConfigManager *config;
+
 #endif

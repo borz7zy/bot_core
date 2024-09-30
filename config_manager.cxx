@@ -2,7 +2,15 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <filesystem>
+#include "globals.hxx"
 namespace fs = std::filesystem;
+
+ConfigManager::ConfigManager()
+{
+}
+ConfigManager::~ConfigManager()
+{
+}
 
 bool ConfigManager::load(const char *filename)
 {
@@ -39,7 +47,7 @@ bool ConfigManager::load(const char *filename)
             std::string value = line.substr(pos + 1);
             trim(key);
             trim(value);
-            config[key] = value;
+            configMap[key] = value;
         }
     }
 
@@ -49,13 +57,27 @@ bool ConfigManager::load(const char *filename)
 
 std::string ConfigManager::get(const char *key) const
 {
-    auto it = config.find(key);
-    if (it != config.end())
+    auto it = configMap.find(key);
+    if (it != configMap.end())
     {
         return it->second;
     }
 
     return "";
+}
+
+void ConfigManager::trim(std::string &str) const
+{
+    size_t first = str.find_first_not_of(' ');
+    size_t last = str.find_last_not_of(' ');
+    if (first != std::string::npos && last != std::string::npos)
+    {
+        str = str.substr(first, (last - first + 1));
+    }
+    else
+    {
+        str.clear();
+    }
 }
 
 bool ConfigManager::directoryExists(const std::string &path)

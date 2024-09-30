@@ -1,12 +1,7 @@
 #ifndef _MAIN_SCRIPTS_HXX
 #define _MAIN_SCRIPTS_HXX
 
-extern "C"
-{
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
+#include "global_sdk.hxx"
 
 class MainScript
 {

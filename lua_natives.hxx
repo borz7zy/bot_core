@@ -2,12 +2,7 @@
 #define _LUA_NATIVES_HXX
 
 #include <vector>
-extern "C"
-{
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
+#include "global_sdk.hxx"
 
 #define REGISTER_NATIVES_NAME "RegisterNatives"
 

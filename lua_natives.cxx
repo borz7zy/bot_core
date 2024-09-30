@@ -1,6 +1,5 @@
 #include "lua_natives.hxx"
 #include "plugin_manager.hxx"
-#include "global_sdk.hxx"
 #include "globals.hxx"
 
 typedef Native_Function_List *(*RegisterNativesFunc)();

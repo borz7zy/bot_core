@@ -7,6 +7,95 @@
 #endif
 #include <cstring>
 #include <sstream>
+#include "globals.hxx"
+
+Core::Core()
+{
+    if (config->load("./bot_core.conf"))
+    {
+        std::string mainScriptPath = config->get("main_script_path");
+        std::string misPath = config->get("minor_scripts_path");
+        plPath = config->get("plugins_path");
+
+        std::string minScripts = config->get("minor_scripts");
+        std::string mainScriptNP = config->get("main_script");
+        ticks = std::stoi(config->get("ticks"));
+
+        processScripts(minScripts, misPath, minorScripts);
+
+        mainScript = mainScriptPath + "/" + mainScriptNP;
+    }
+    else
+    {
+        if (config->generateConfig())
+        {
+            logp->printlf("Directories and a standard config were generated. Please configure the config and run the core again!");
+        }
+        return;
+    }
+
+    TickSys tickSys(ticks, [this]()
+                    { tick_update(); });
+
+    for (const auto &minorScript : minorScripts)
+    {
+        preloadStates(minorScript.c_str());
+    }
+
+    preloadStates(mainScript.c_str());
+
+    pluginManager.LoadPlugins(plPath);
+
+    loadedLibraries = pluginManager.GetLoadedLibraries();
+
+    for (const auto &stateInfo : luaStates)
+    {
+        for (const auto &[plugin, name] : loadedLibraries)
+        {
+            luaNatives.CallGetNatives(stateInfo.L, plugin, name.c_str());
+        }
+
+        lua_register(stateInfo.L, "load_module", safe_require);
+    }
+
+    for (const auto &minorScript : minorScripts)
+    {
+        try
+        {
+            lua_State *state = getStateFromVector(minorScript.c_str());
+            loadMinor(state, minorScript.c_str());
+        }
+        catch (const std::runtime_error &e)
+        {
+            logp->printlf("Error while searching state for script %s: %s", minorScript.c_str(), e.what());
+        }
+    }
+
+    try
+    {
+        lua_State *state = getStateFromVector(mainScript.c_str());
+        loadMain(state);
+    }
+    catch (const std::runtime_error &e)
+    {
+        logp->printlf("Error while searching state for script %s: %s", mainScript.c_str(), e.what());
+    }
+
+    logp->printlf("The core was initialized successfully.");
+
+    tickSys.start();
+}
+Core::~Core()
+{
+    for (const auto &stateInfo : luaStates)
+    {
+        if (stateInfo.L)
+        {
+            lua_close(stateInfo.L);
+        }
+    }
+    logp->printlf("Shutting down the core.");
+}
 
 void Core::processScripts(const std::string &scripts, const std::string &basePath, std::vector<std::string> &output)
 {
