@@ -33,7 +33,16 @@ cd bot_core
 git submodule init
 git submodule update --init --recursive
 mkdir build && cd build
-cmake ..
+```
+
+For Debug mode:
+```
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+```
+
+OR Release
+```
+cmake -DCMAKE_BUILD_TYPE=Release ..
 ```
 
 ### Build Instructions
