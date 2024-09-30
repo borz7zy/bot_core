@@ -1,8 +1,6 @@
 #ifndef _MAIN_SCRIPTS_HXX
 #define _MAIN_SCRIPTS_HXX
 
-#include <logprint.hxx>
-
 extern "C"
 {
 #include "lua.h"
@@ -13,7 +11,7 @@ extern "C"
 class MainScript
 {
 public:
-    MainScript(logprint &LogsCore) : logger(&LogsCore)
+    MainScript()
     {
     }
     ~MainScript()
@@ -23,7 +21,6 @@ public:
     void callFunction(lua_State *L, const char *script, const char *functionName);
 
 private:
-    logprint *logger;
     void unload(lua_State *L, const char *script);
 };
 

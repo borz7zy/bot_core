@@ -9,7 +9,7 @@ bool ConfigManager::load(const char *filename)
     std::ifstream file(filename);
     if (!file.is_open())
     {
-        logger->LOGE("Error opening file: %s", filename);
+        logp->printlf("Error opening file: %s", filename);
         return false;
     }
 
@@ -84,7 +84,7 @@ bool ConfigManager::generateConfig()
 
     if (!configFile)
     {
-        logger->LOGE("Error: failed to create a file %s", filename);
+        logp->printlf("Error: failed to create a file %s", filename);
         return false;
     }
 

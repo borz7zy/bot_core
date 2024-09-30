@@ -3,13 +3,13 @@
 
 #include <string>
 #include <unordered_map>
-#include <logprint.hxx>
 #include <string>
+#include "globals.hxx"
 
 class ConfigManager
 {
 public:
-    ConfigManager() : logp("CONFIG MANAGER", "./config_manager.log")
+    ConfigManager()
     {
     }
     ~ConfigManager()
@@ -21,8 +21,6 @@ public:
 
 private:
     std::unordered_map<std::string, std::string> config;
-    logprint logp;
-    logprint *logger = &logp;
     void trim(std::string &str) const
     {
         size_t first = str.find_first_not_of(' ');

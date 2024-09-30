@@ -1,8 +1,6 @@
 #ifndef _MINOR_SCRIPTS_HXX
 #define _MINOR_SCRIPTS_HXX
 
-#include <logprint.hxx>
-
 extern "C"
 {
 #include "lua.h"
@@ -13,7 +11,7 @@ extern "C"
 class MinorScripts
 {
 public:
-    MinorScripts(logprint &LogsCore) : logger(&LogsCore)
+    MinorScripts()
     {
     }
     ~MinorScripts()
@@ -22,9 +20,6 @@ public:
     void load(lua_State *L, const char *script);
     void unload(lua_State *L, const char *script);
     void callFunction(lua_State *L, const char *script, const char *functionName);
-
-private:
-    logprint *logger;
 };
 
 #endif

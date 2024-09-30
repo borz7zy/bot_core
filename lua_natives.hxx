@@ -1,7 +1,6 @@
 #ifndef _LUA_NATIVES_HXX
 #define _LUA_NATIVES_HXX
 
-#include <logprint.hxx>
 #include <vector>
 extern "C"
 {
@@ -15,14 +14,10 @@ extern "C"
 class LuaNatives
 {
 public:
-    LuaNatives() : LogsLN("LUA NATIVES", "./lua_natives.log") {}
+    LuaNatives() {}
     ~LuaNatives() {}
 
     void CallGetNatives(lua_State *L, void *plugin, const char *lib_name);
-
-private:
-    logprint LogsLN;
-    logprint *logger = &LogsLN;
 };
 
 #endif

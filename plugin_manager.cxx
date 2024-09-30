@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <filesystem>
-#include <logprint.hxx>
 #include <any>
 #include <vector>
 #include <stdexcept>
@@ -11,11 +10,9 @@
 #else
 #include <dlfcn.h>
 #endif
+#include "globals.hxx"
 
 namespace fs = std::filesystem;
-
-logprint logger("PLUGINS", "./plugins.log");
-logprint *logs = &logger;
 
 PluginManager::PluginManager()
 {
@@ -42,7 +39,7 @@ void PluginManager::LoadPlugins(const std::string &directory)
             if (filePath.substr(filePath.find_last_of(".")) == ".so")
 #endif
             {
-                logs->LOGI("Loading: %s", filePath.c_str());
+                logp->printlf("Loading: %s", filePath.c_str());
                 void *libHandle = LoadLibrary(filePath);
                 if (libHandle)
                 {
@@ -50,7 +47,7 @@ void PluginManager::LoadPlugins(const std::string &directory)
                 }
                 else
                 {
-                    logs->LOGE("Failed to load: %s", filePath.c_str());
+                    logp->printlf("Failed to load: %s", filePath.c_str());
                 }
             }
         }
@@ -69,7 +66,7 @@ void *PluginManager::LoadLibrary(const std::string &path)
             FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
             NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
             (LPTSTR)&lpMsgBuf, 0, NULL);
-        logs->LOGE("Error loading plugin: %s", (char *)lpMsgBuf);
+        logp->printlf("Error loading plugin: %s", (char *)lpMsgBuf);
         LocalFree(lpMsgBuf);
     }
     return hLib;
@@ -77,7 +74,7 @@ void *PluginManager::LoadLibrary(const std::string &path)
     void *handle = dlopen(path.c_str(), RTLD_LAZY);
     if (!handle)
     {
-        logs->LOGE("Error loading plugin: %s", dlerror());
+        logp->printlf("Error loading plugin: %s", dlerror());
     }
     return handle;
 #endif

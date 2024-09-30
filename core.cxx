@@ -45,17 +45,14 @@ int Core::safe_require(lua_State *L)
 
 void Core::loadMinor(lua_State *L, const char *minorScript)
 {
-    MinorScripts minScripts(LogsCore);
-    MinorScripts *minor = &minScripts;
-    minor->load(L, minorScript);
+    MinorScripts minScripts;
+    minScripts.load(L, minorScript);
 }
 
 void Core::loadMain(lua_State *L)
 {
-    MainScript mScript(LogsCore);
-    MainScript *main = &mScript;
-
-    main->load(L, mainScript.c_str());
+    MainScript mScript;
+    mScript.load(L, mainScript.c_str());
 }
 
 void Core::callUpdatePlugin(void *plugin)
@@ -92,7 +89,7 @@ void Core::preloadStates(const char *script)
     lua_State *L = luaL_newstate();
     if (L == nullptr)
     {
-        logger->LOGE("Core initialization error: Lua could not allocate state");
+        logp->printlf("Core initialization error: Lua could not allocate state");
         return;
     }
     luaL_openlibs(L);
@@ -132,7 +129,7 @@ void Core::callUpdateInScript(const char *script)
     lua_getglobal(L, script);
     if (lua_isnil(L, -1))
     {
-        logger->LOGE("Global %s not found", script);
+        logp->printlf("Global %s not found", script);
         lua_pop(L, 1);
         return;
     }
@@ -140,7 +137,7 @@ void Core::callUpdateInScript(const char *script)
     lua_getglobal(L, "UpdateTicks");
     if (lua_isnil(L, -1))
     {
-        // logger->LOGE("Function UpdateTicks not found in %s", script);
+        // logp->printlf("Function UpdateTicks not found in %s", script);
         lua_pop(L, 1);
         return;
     }
@@ -150,7 +147,7 @@ void Core::callUpdateInScript(const char *script)
         if (lua_pcall(L, 0, 0, 0) != LUA_OK)
         {
             const char *error = lua_tostring(L, -1);
-            logger->LOGE("Error calling UpdateTicks on %s: %s", script, error);
+            logp->printlf("Error calling UpdateTicks on %s: %s", script, error);
             lua_pop(L, 1);
         }
     }

@@ -1,4 +1,5 @@
 #include "main_script.hxx"
+#include "globals.hxx"
 
 void MainScript::load(lua_State *L, const char *script)
 {
@@ -11,7 +12,7 @@ void MainScript::load(lua_State *L, const char *script)
 
     if (luaL_loadfile(L, script) || lua_pcall(L, 0, LUA_MULTRET, 0))
     {
-        logger->LOGE("Error opening LUAC: %s", lua_tostring(L, -1));
+        logp->printlf("Error opening LUAC: %s", lua_tostring(L, -1));
         lua_pop(L, 1);
         return;
     }
@@ -21,7 +22,7 @@ void MainScript::load(lua_State *L, const char *script)
     {
         if (lua_pcall(L, 0, LUA_MULTRET, 0) != LUA_OK)
         {
-            logger->LOGE("Error calling main function: %s", lua_tostring(L, -1));
+            logp->printlf("Error calling main function: %s", lua_tostring(L, -1));
             lua_pop(L, 1);
             unload(L, script);
             return;
@@ -29,7 +30,7 @@ void MainScript::load(lua_State *L, const char *script)
     }
     else
     {
-        logger->LOGE("The main function is not defined in the script!");
+        logp->printlf("The main function is not defined in the script!");
         return;
     }
 }
@@ -59,7 +60,7 @@ void MainScript::callFunction(lua_State *L, const char *script, const char *func
     }
     else
     {
-        logger->LOGE("Function %s not found in %s script!", functionName, script);
+        logp->printlf("Function %s not found in %s script!", functionName, script);
         lua_pop(L, 1);
     }
 }

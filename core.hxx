@@ -1,7 +1,6 @@
 #ifndef _CORE_HXX
 #define _CORE_HXX
 
-#include <logprint.hxx>
 #include "config_manager.hxx"
 #include "minor_scripts.hxx"
 #include "main_script.hxx"
@@ -11,6 +10,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include "globals.hxx"
 
 extern "C"
 {
@@ -22,7 +22,7 @@ extern "C"
 class Core
 {
 public:
-    Core() : LogsCore("CORE", "./core.log")
+    Core()
     {
         if (config->load("./bot_core.conf"))
         {
@@ -42,7 +42,7 @@ public:
         {
             if (config->generateConfig())
             {
-                logger->LOGI("Directories and a standard config were generated. Please configure the config and run the core again!");
+                logp->printlf("Directories and a standard config were generated. Please configure the config and run the core again!");
             }
             return;
         }
@@ -80,7 +80,7 @@ public:
             }
             catch (const std::runtime_error &e)
             {
-                logger->LOGE("Error while searching state for script %s: %s", minorScript.c_str(), e.what());
+                logp->printlf("Error while searching state for script %s: %s", minorScript.c_str(), e.what());
             }
         }
 
@@ -91,10 +91,10 @@ public:
         }
         catch (const std::runtime_error &e)
         {
-            logger->LOGE("Error while searching state for script %s: %s", mainScript.c_str(), e.what());
+            logp->printlf("Error while searching state for script %s: %s", mainScript.c_str(), e.what());
         }
 
-        logger->LOGI("The core was initialized successfully.");
+        logp->printlf("The core was initialized successfully.");
 
         tickSys.start();
     }
@@ -107,7 +107,7 @@ public:
                 lua_close(stateInfo.L);
             }
         }
-        logger->LOGI("Shutting down the core.");
+        logp->printlf("Shutting down the core.");
     }
 
 private:
@@ -122,9 +122,6 @@ private:
         const char *script;
     };
     std::vector<LuaStateInfo> luaStates;
-
-    logprint LogsCore;
-    logprint *logger = &LogsCore;
 
     std::string plPath;
 

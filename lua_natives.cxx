@@ -1,6 +1,7 @@
 #include "lua_natives.hxx"
 #include "plugin_manager.hxx"
 #include "global_sdk.hxx"
+#include "globals.hxx"
 
 typedef Native_Function_List *(*RegisterNativesFunc)();
 
@@ -22,17 +23,17 @@ void LuaNatives::CallGetNatives(lua_State *L, void *plugin, const char *lib_name
             FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
             NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
             (LPTSTR)&lpMsgBuf, 0, NULL);
-        logger->LOGE("Failed to get RegisterNatives function: %s", (char *)lpMsgBuf);
+        logp->printlf("Failed to get RegisterNatives function: %s", (char *)lpMsgBuf);
         LocalFree(lpMsgBuf);
 #else
-        logger->LOGE("Failed to get RegisterNatives function: %s", dlerror());
+        logp->printlf("Failed to get RegisterNatives function: %s", dlerror());
 #endif
         return;
     }
     Native_Function_List *nativeList = registerNatives();
     if (!nativeList)
     {
-        logger->LOGE("RegisterNatives returned null!");
+        logp->printlf("RegisterNatives returned null!");
         return;
     }
     for (int i = 0; nativeList[i].nativeName != nullptr; ++i)

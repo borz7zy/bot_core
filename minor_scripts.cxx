@@ -1,4 +1,5 @@
 #include "minor_scripts.hxx"
+#include "globals.hxx"
 
 void MinorScripts::load(lua_State *L, const char *script)
 {
@@ -9,7 +10,7 @@ void MinorScripts::load(lua_State *L, const char *script)
 
     if (luaL_loadfile(L, script) || lua_pcall(L, 0, LUA_MULTRET, 0))
     {
-        logger->LOGE("Error loading minor script %s: %s", script, lua_tostring(L, -1));
+        logp->printlf("Error loading minor script %s: %s", script, lua_tostring(L, -1));
         lua_pop(L, 1);
         return;
     }
@@ -40,7 +41,7 @@ void MinorScripts::callFunction(lua_State *L, const char *script, const char *fu
     }
     else
     {
-        logger->LOGE("Function %s not found in %s script!", functionName, script);
+        logp->printlf("Function %s not found in %s script!", functionName, script);
         lua_pop(L, 1);
     }
 }
