@@ -11,13 +11,13 @@
 class logger
 {
 public:
-    logger(const char *log_file)
+    logger()
     {
         if (pLogFile)
         {
             fclose(pLogFile);
         }
-        pLogFile = fopen(log_file, "a");
+        pLogFile = fopen("./bot_core.log", "a");
         if (pLogFile)
         {
             printf("\n");
@@ -35,6 +35,7 @@ public:
         fclose(pLogFile);
     }
     void printlf(const char *format, ...);
+    static logger &getLoggerInstance();
 
 private:
     FILE *pLogFile;

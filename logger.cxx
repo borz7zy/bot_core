@@ -31,3 +31,9 @@ void logger::printlf(const char *format, ...)
         fflush(pLogFile);
     }
 }
+
+logger &logger::getLoggerInstance()
+{
+    static logger instanceLogger;
+    return instanceLogger;
+}

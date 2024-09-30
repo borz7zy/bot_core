@@ -1,7 +1,7 @@
 #include "globals.hxx"
 
 // logger
-logger logs("bot_core.log");
+logger logs;
 logger *logp = &logs;
 
 // config_manager
