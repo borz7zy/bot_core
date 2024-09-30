@@ -181,14 +181,15 @@ void Core::preloadStates(const char *script)
         logp->printlf("Core initialization error: Lua could not allocate state");
         return;
     }
-    luaL_openlibs(L);
 
-    lua_pushnil(L);
-    lua_setglobal(L, "io");
-    lua_pushnil(L);
-    lua_setglobal(L, "os");
-    lua_pushnil(L);
-    lua_setglobal(L, "package");
+    luaL_requiref(L, "string", luaopen_string, 1);
+    lua_pop(L, 1);
+
+    luaL_requiref(L, "math", luaopen_math, 1);
+    lua_pop(L, 1);
+
+    luaL_requiref(L, "table", luaopen_table, 1);
+    lua_pop(L, 1);
 
     LuaStateInfo stateInfo;
     stateInfo.L = L;
