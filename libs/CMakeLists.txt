@@ -9,8 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(LIBS_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(THIRD_PARTY_LIBS ${LIBS_PATH}/third_party)
 
-set(LOGPRINT_LIB ${LIBS_PATH}/logprint)
-
 set(LUA_SOURCES ${THIRD_PARTY_LIBS}/lua)
 set(LUA_BUILD
     ${LUA_SOURCES}/lapi.c
@@ -53,8 +51,6 @@ set(LUA_HEADERS
     ${LUA_SOURCES}/luaconf.h
     ${LUA_SOURCES}/lualib.h
 )
-
-add_library(logprint STATIC ${LOGPRINT_LIB}/logprint.cpp)
 
 add_library(lua STATIC ${LUA_BUILD})
 if (WIN32)

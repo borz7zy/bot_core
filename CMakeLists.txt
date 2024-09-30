@@ -10,6 +10,8 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
 set(BOT_SRC
     main.cxx
+    globals.cxx
+    logger.cxx
     config_manager.cxx
     tick_sys.cxx
     core.cxx
@@ -19,10 +21,8 @@ set(BOT_SRC
     main_script.cxx
 )
 
-
 add_executable(bot_core ${BOT_SRC})
 target_include_directories(bot_core PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/logprint
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/third_party/lua
 )
-target_link_libraries(bot_core PRIVATE logprint lua::lib lua::header)
+target_link_libraries(bot_core PRIVATE lua::lib lua::header)
