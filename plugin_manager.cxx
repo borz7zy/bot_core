@@ -39,7 +39,7 @@ void PluginManager::LoadPlugins(const std::string &directory)
             if (filePath.substr(filePath.find_last_of(".")) == ".so")
 #endif
             {
-                logp->printlf("Loading: %s", filePath.c_str());
+                logp->printlf("Loading plugin: %s", filePath.c_str());
                 void *libHandle = LoadLibrary(filePath);
                 if (libHandle)
                 {
@@ -47,7 +47,7 @@ void PluginManager::LoadPlugins(const std::string &directory)
                 }
                 else
                 {
-                    logp->printlf("Failed to load: %s", filePath.c_str());
+                    logp->printlf("Failed to load plugin: %s", filePath.c_str());
                 }
             }
         }
