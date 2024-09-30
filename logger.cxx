@@ -6,7 +6,7 @@ void logger::printlf(const char *format, ...)
     va_start(ap, format);
 
     char buffer[2048];
-    vsprintf(buffer, format, ap);
+    vsnprintf(buffer, sizeof buffer, format, ap);
 
     va_end(ap);
 
