@@ -24,6 +24,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/compiler)
 
 set(BOT_SRC
     main.cxx
+    utils.cxx
     globals.cxx
     logger.cxx
     config_manager.cxx
