@@ -56,6 +56,8 @@ Core::Core()
         }
 
         lua_register(stateInfo.L, "load_module", safe_require);
+
+        luaNatives.RegisterLuaNatives(stateInfo.L);
     }
 
     for (const auto &minorScript : minorScripts)

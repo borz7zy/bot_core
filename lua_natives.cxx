@@ -1,6 +1,7 @@
 #include "lua_natives.hxx"
 #include "plugin_manager.hxx"
 #include "globals.hxx"
+#include "utils.hxx"
 
 typedef Native_Function_List *(*RegisterNativesFunc)();
 
@@ -42,4 +43,29 @@ void LuaNatives::CallGetNatives(lua_State *L, void *plugin, const char *lib_name
     {
         lua_register(L, nativeList[i].nativeName, nativeList[i].funcPtr);
     }
+}
+
+void LuaNatives::RegisterLuaNatives(lua_State *L)
+{
+    for (int i = 0; native_list[i].nativeName != nullptr; ++i)
+    {
+        lua_register(L, native_list[i].nativeName, native_list[i].funcPtr);
+    }
+}
+
+int LuaNatives::native_GetEnv(lua_State *L)
+{
+    Utils utils;
+    const char *env_name = luaL_checkstring(L, 1);
+    const char *env_result = utils.GetEnv(env_name);
+    lua_pushstring(L, env_result);
+    return 1;
+}
+
+int LuaNatives::native_print(lua_State *L)
+{
+    const char *str = luaL_checkstring(L, 1);
+    logp->printlf(str);
+    lua_pushinteger(L, true);
+    return 1;
 }
