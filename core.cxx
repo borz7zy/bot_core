@@ -55,8 +55,6 @@ Core::Core()
             luaNatives.CallGetNatives(stateInfo.L, plugin, name.c_str());
         }
 
-        lua_register(stateInfo.L, "load_module", safe_require);
-
         luaNatives.RegisterLuaNatives(stateInfo.L);
     }
 
@@ -107,31 +105,6 @@ void Core::processScripts(const std::string &scripts, const std::string &basePat
     {
         output.push_back(basePath + "/" + script);
     }
-}
-
-int Core::safe_require(lua_State *L)
-{
-    const char *module_name = lua_tostring(L, 1);
-
-    std::string module_path = "./modules/" + std::string(module_name) + ".luac";
-
-    if (luaL_loadfile(L, module_path.c_str()) != LUA_OK)
-    {
-        const char *error = lua_tostring(L, -1);
-        lua_pushstring(L, error);
-        return lua_error(L);
-    }
-
-    if (lua_pcall(L, 0, LUA_MULTRET, 0) != LUA_OK)
-    {
-        const char *error = lua_tostring(L, -1);
-        lua_pushstring(L, error);
-        return lua_error(L);
-    }
-
-    lua_setglobal(L, module_name);
-
-    return 0;
 }
 
 void Core::loadMinor(lua_State *L, const char *minorScript)

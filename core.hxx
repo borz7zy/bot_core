@@ -48,8 +48,6 @@ private:
 
     void tick_update();
 
-    static int safe_require(lua_State *L);
-
     void loadMinor(lua_State *L, const char *minorScript);
     void loadMain(lua_State *L);
 };

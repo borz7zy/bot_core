@@ -13,10 +13,13 @@ public:
     void RegisterLuaNatives(lua_State *L);
 
 private:
+    static int safe_require(lua_State *L);
+
     static int native_GetEnv(lua_State *L); // GetEnv
     static int native_print(lua_State *L);  // print
 
-    const Native_Function_List native_list[3] = {
+    const Native_Function_List native_list[4] = {
+        {"load_module", safe_require},
         {"GetEnv", native_GetEnv},
         {"print", native_print},
         {nullptr, nullptr}};
