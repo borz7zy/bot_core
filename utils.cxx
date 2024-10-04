@@ -263,7 +263,7 @@ void RuntilH::Util_Base64Encode(char *cpInput, char *cpOutput)
 int RuntilH::CanFileBeOpenedForReading(char *filename)
 {
     FILE *f;
-    if (f = fopen(filename, "r"))
+    if ((f = fopen(filename, "r")) != nullptr)
     {
         fclose(f);
         return 1;
