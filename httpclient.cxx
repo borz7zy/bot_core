@@ -275,21 +275,25 @@ void CHttpClient::Process()
         header_len = strlen(m_Request.file) + strlen(m_Request.host) +
                      (strlen(GET_FORMAT) - 8) + strlen(USER_AGENT) +
                      strlen(m_Request.referer);
-        sprintf(request_head, GET_FORMAT, m_Request.file, USER_AGENT, m_Request.referer, m_Request.host);
+        snprintf(request_head, sizeof(request_head), GET_FORMAT,
+                 m_Request.file, USER_AGENT, m_Request.referer, m_Request.host);
         break;
 
     case HTTP_HEAD:
         header_len = strlen(m_Request.file) + strlen(m_Request.host) +
                      (strlen(HEAD_FORMAT) - 8) + strlen(USER_AGENT) +
                      strlen(m_Request.referer);
-        sprintf(request_head, HEAD_FORMAT, m_Request.file, USER_AGENT, m_Request.referer, m_Request.host);
+        snprintf(request_head, sizeof(request_head), HEAD_FORMAT,
+                 m_Request.file, USER_AGENT, m_Request.referer, m_Request.host);
         break;
 
     case HTTP_POST:
         header_len = strlen(m_Request.data) + strlen(m_Request.file) +
                      strlen(m_Request.host) + strlen(POST_FORMAT) +
                      strlen(USER_AGENT) + strlen(m_Request.referer);
-        sprintf(request_head, POST_FORMAT, m_Request.file, USER_AGENT, m_Request.referer, m_Request.host, strlen(m_Request.data), m_Request.data);
+        snprintf(request_head, sizeof(request_head), POST_FORMAT,
+                 m_Request.file, USER_AGENT, m_Request.referer, m_Request.host,
+                 strlen(m_Request.data), m_Request.data);
         break;
     }
 
@@ -315,7 +319,7 @@ void CHttpClient::HandleEntity()
     char header[1024];
     char *head_end;
     char *pcontent_buf;
-    char content_len_str[256];
+    char content_len_str[256] = {0};
 
     bool header_got = false;
     bool has_content_len = false;
@@ -329,49 +333,36 @@ void CHttpClient::HandleEntity()
 
         if (!header_got)
         {
-            if ((head_end = strstr(response, "\r\n\r\n")) != NULL || (head_end = strstr(response, "\n\n")) != NULL)
+            if ((head_end = strstr(response, "\r\n\r\n")) != NULL ||
+                (head_end = strstr(response, "\n\n")) != NULL)
             {
-
                 header_got = true;
 
                 header_len = (head_end - response);
                 memcpy(header, response, header_len);
                 header[header_len] = '\0';
 
-                if ((*(response + header_len)) == '\n') /* LFLF */
+                if (*(response + header_len) == '\n') // LFLF
                 {
                     bytes_total -= (header_len + 2);
                     memmove(response, (response + (header_len + 2)), bytes_total);
                 }
-                else /* assume CRLFCRLF */
+                else // assume CRLFCRLF
                 {
                     bytes_total -= (header_len + 4);
                     memmove(response, (response + (header_len + 4)), bytes_total);
                 }
 
-                /* find the content-length if available */
                 if ((pcontent_buf = RuntilH::Util_stristr(header, "CONTENT-LENGTH:")) != NULL)
                 {
                     has_content_len = true;
 
                     pcontent_buf += 16;
-                    while (*pcontent_buf != '\n' && *pcontent_buf)
+                    while (*pcontent_buf != '\n' && *pcontent_buf && *pcontent_buf != '\r')
                     {
-                        *pcontent_buf++;
-                        content_len++;
+                        content_len_str[content_len++] = *pcontent_buf++;
                     }
-
-                    pcontent_buf -= content_len;
-                    memcpy(content_len_str, pcontent_buf, content_len);
-
-                    if (content_len_str[content_len - 1] == '\r')
-                    {
-                        content_len_str[content_len - 1] = '\0';
-                    }
-                    else
-                    {
-                        content_len_str[content_len] = '\0';
-                    }
+                    content_len_str[content_len] = '\0';
 
                     content_len = atoi(content_len_str);
                     if (content_len > MAX_ENTITY_LENGTH)
@@ -384,50 +375,35 @@ void CHttpClient::HandleEntity()
             }
         }
 
-        if (header_got && has_content_len)
-            if (bytes_total >= content_len)
-                break;
+        if (header_got && has_content_len && bytes_total >= content_len)
+            break;
     }
 
     CloseConnection();
 
     response[bytes_total] = '\0';
 
-    // check the returned header
     unsigned long *magic = (unsigned long *)header;
-
     if (*magic != 0x50545448)
-    { // 'HTTP'
+    {
         m_iError = HTTP_ERROR_MALFORMED_RESPONSE;
         return;
     }
 
-    // Now fill in the response code
     char response_code_str[4];
-    response_code_str[0] = *(header + 9);
-    response_code_str[1] = *(header + 10);
-    response_code_str[2] = *(header + 11);
+    memcpy(response_code_str, header + 9, 3);
     response_code_str[3] = '\0';
     m_Response.response_code = atoi(response_code_str);
 
-    // Copy over the document entity strings and sizes
     memcpy(m_Response.header, header, header_len + 1);
     m_Response.header_len = header_len;
     memcpy(m_Response.response, response, bytes_total + 1);
     m_Response.response_len = bytes_total;
 
-    /*
-    char s[4096];
-    m_Response.response[bytes_total] = '\0';
-    sprintf(s,"Code: %u\n\n%s\n%s\n",m_Response.response_code,m_Response.header,m_Response.response);
-    OutputDebugString(s);*/
-
-    // Try and determine the document type
-    m_Response.content_type = CONTENT_TYPE_HTML; // default to html
+    m_Response.content_type = CONTENT_TYPE_HTML;
 
     char szContentType[256];
-
-    if (GetHeaderValue("CONTENT-TYPE:", szContentType, 256) == true)
+    if (GetHeaderValue("CONTENT-TYPE:", szContentType, 256))
     {
         if (strstr(szContentType, "text/html") != NULL)
         {
