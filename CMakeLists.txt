@@ -34,6 +34,7 @@ set(BOT_SRC
     plugin_manager.cxx
     minor_scripts.cxx
     main_script.cxx
+    httpclient.cxx
 )
 
 add_executable(bot_core ${BOT_SRC})
