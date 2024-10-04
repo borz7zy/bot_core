@@ -4,6 +4,7 @@
     - in lua_State from standard libraries now only "string, math, table" is loaded
     - bug fixes
     - added natives print, GetEnv
+    - added simple http client
 -b0.1.0 (28 sep 2024)
     First beta release!
     build logs: https://github.com/borz7zy/bot_core/actions/runs/11087594299
