@@ -1,7 +1,8 @@
 #ifndef _HTTPCLIENT_HXX
 #define _HTTPCLIENT_HXX
 
-//
+#include <cstddef>
+#include <cstring>
 
 enum HTTP_METHOD
 {
@@ -9,22 +10,6 @@ enum HTTP_METHOD
     HTTP_POST,
     HTTP_HEAD,
 };
-
-//----------------------------------------------------
-
-#ifndef PACKED
-#if defined(_MSC_VER)
-#define PACKED
-#else
-#define PACKED __attribute__((packed))
-#endif
-#endif
-
-//----------------------------------------------------
-
-#define MAX_ENTITY_LENGTH 64000
-
-//----------------------------------------------------
 
 enum HTTP_STATUS
 {
@@ -37,45 +22,55 @@ enum HTTP_STATUS
     HTTP_ERROR_MALFORMED_RESPONSE,
 };
 
-//----------------------------------------------------
-
 enum CONTENT_TYPE
 {
     CONTENT_TYPE_UNKNOWN,
     CONTENT_TYPE_TEXT,
     CONTENT_TYPE_HTML,
+    CONTENT_TYPE_JSON,
+    CONTENT_TYPE_XML,
+    CONTENT_TYPE_JAVASCRIPT,
+    CONTENT_TYPE_IMAGE_JPEG,
+    CONTENT_TYPE_IMAGE_PNG,
+    CONTENT_TYPE_CSS
 };
 
-//----------------------------------------------------
-
 #define USER_AGENT "botcore/0.1"
+#define MAX_ENTITY_LENGTH 131072
 #define GET_FORMAT "GET %s HTTP/1.0\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\n\r\n"
 #define POST_FORMAT "POST %s HTTP/1.0\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\nContent-type: application/x-www-form-urlencoded\r\nContent-length: %zu\r\n\r\n%s"
 #define HEAD_FORMAT "HEAD %s HTTP/1.0\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\n\r\n"
 
-//----------------------------------------------------
+#ifndef PACKED
+#if defined(_MSC_VER)
+#define PACKED
+#else
+#define PACKED __attribute__((packed))
+#endif
+#endif
 
 #ifdef _WIN32
 #pragma pack(push, 1)
 #endif
+
 typedef struct
 {
-    unsigned short port PACKED; /* remote port */
-    int rtype PACKED;           /* request type */
-    char host[256] PACKED;      /* hostname */
-    char file[1024] PACKED;     /* GET/POST request file */
-    char data[16384] PACKED;    /* POST data (if rtype HTTP_POST) */
-    char referer[256] PACKED;   /* http referer. */
+    unsigned short port PACKED;
+    int rtype PACKED;
+    char host[256] PACKED;
+    char file[1024] PACKED;
+    char data[16384] PACKED;
+    char referer[256] PACKED;
 } PACKED HTTP_REQUEST;
+
 #ifdef _WIN32
 #pragma pack(pop)
 #endif
 
-//----------------------------------------------------
-
 #ifdef _WIN32
 #pragma pack(push, 1)
 #endif
+
 typedef struct
 {
     char header[1024] PACKED;
@@ -85,15 +80,15 @@ typedef struct
     unsigned int response_code PACKED;
     unsigned int content_type PACKED;
 } PACKED HTTP_RESPONSE;
+
 #ifdef _WIN32
 #pragma pack(pop)
 #endif
 
-//----------------------------------------------------
-
 #ifdef _WIN32
 #pragma pack(push, 1)
 #endif
+
 class PACKED CHttpClient
 {
 private:
@@ -104,33 +99,31 @@ private:
     char m_szBindAddress[256];
     int m_iHasBindAddress;
 
-    bool Connect(char *szHost, int iPort, char *szBindAddress = nullptr);
+    bool Connect(const char *szHost, int iPort, const char *szBindAddress = nullptr);
     void CloseConnection();
-    bool Send(char *szData);
+    bool Send(const char *szData);
     int Recv(char *szBuffer, int iBufferSize);
 
     void InitRequest(int iType, const char *szURL, const char *szPostData, const char *szReferer);
     void HandleEntity();
-
     void Process();
 
 public:
-    int ProcessURL(int iType, const char *szURL, char *szData, const char *szReferer);
+    int ProcessURL(int iType, const char *szURL, const char *szData, const char *szReferer);
 
     bool GetHeaderValue(const char *szHeaderName, char *szReturnBuffer, size_t iBufSize);
-    int GetResponseCode() { return m_Response.response_code; };
-    int GetContentType() { return m_Response.content_type; };
-    char *GetResponseHeaders() { return m_Response.header; };
-    char *GetDocument() { return m_Response.response; };
-    int GetDocumentLength() { return m_Response.response_len; };
+    int GetResponseCode() const { return m_Response.response_code; }
+    int GetContentType() const { return m_Response.content_type; }
+    const char *GetResponseHeaders() const { return m_Response.header; }
+    const char *GetDocument() const { return m_Response.response; }
+    int GetDocumentLength() const { return m_Response.response_len; }
 
-    CHttpClient(char *szBindAddress);
+    CHttpClient(const char *szBindAddress);
     ~CHttpClient();
 };
+
 #ifdef _WIN32
 #pragma pack(pop)
 #endif
-
-//----------------------------------------------------
 
 #endif
