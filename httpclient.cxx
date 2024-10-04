@@ -295,7 +295,7 @@ void CHttpClient::HandleEntity()
     char buffer[RECV_BUFFER_SIZE];
     char response[MAX_ENTITY_LENGTH];
 
-    char header[1024];
+    char header[8192];
     const char *head_end;
     char *pcontent_buf;
     char content_len_str[256] = {0};
@@ -361,13 +361,6 @@ void CHttpClient::HandleEntity()
     CloseConnection();
 
     response[bytes_total] = '\0';
-
-    unsigned long *magic = reinterpret_cast<unsigned long *>(header);
-    if (*magic != 0x50545448)
-    {
-        m_iError = HTTP_ERROR_MALFORMED_RESPONSE;
-        return;
-    }
 
     char response_code_str[4];
     memcpy(response_code_str, header + 9, 3);
