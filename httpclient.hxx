@@ -7,6 +7,16 @@
 
 //----------------------------------------------------
 
+#ifndef PACKED
+#if defined(_MSC_VER)
+#define PACKED
+#else
+#define PACKED __attribute__((packed))
+#endif
+#endif
+
+//----------------------------------------------------
+
 #define MAX_ENTITY_LENGTH 64000
 
 //----------------------------------------------------
@@ -40,35 +50,46 @@ enum CONTENT_TYPE
 
 //----------------------------------------------------
 
-#pragma pack(1)
+#ifdef _WIN32
+#pragma pack(push, 1)
+#endif
 typedef struct
 {
-    unsigned short port; /* remote port */
-    int rtype;           /* request type */
-    char host[256];      /* hostname */
-    char file[1024];     /* GET/POST request file */
-    char data[16384];    /* POST data (if rtype HTTP_POST) */
-    char referer[256];   /* http referer. */
-} HTTP_REQUEST;
+    unsigned short port PACKED; /* remote port */
+    int rtype PACKED;           /* request type */
+    char host[256] PACKED;      /* hostname */
+    char file[1024] PACKED;     /* GET/POST request file */
+    char data[16384] PACKED;    /* POST data (if rtype HTTP_POST) */
+    char referer[256] PACKED;   /* http referer. */
+} PACKED HTTP_REQUEST;
+#ifdef _WIN32
+#pragma pack(pop)
+#endif
 
 //----------------------------------------------------
 
-#pragma pack(1)
+#ifdef _WIN32
+#pragma pack(push, 1)
+#endif
 typedef struct
 {
-    char header[1024];
-    char response[MAX_ENTITY_LENGTH];
-    unsigned int header_len;
-    unsigned long response_len;
-    unsigned int response_code;
-    unsigned int content_type;
-} HTTP_RESPONSE;
+    char header[1024] PACKED;
+    char response[MAX_ENTITY_LENGTH] PACKED;
+    unsigned int header_len PACKED;
+    unsigned long response_len PACKED;
+    unsigned int response_code PACKED;
+    unsigned int content_type PACKED;
+} PACKED HTTP_RESPONSE;
+#ifdef _WIN32
+#pragma pack(pop)
+#endif
 
 //----------------------------------------------------
 
-#pragma pack(1)
-
-class CHttpClient
+#ifdef _WIN32
+#pragma pack(push, 1)
+#endif
+class PACKED CHttpClient
 {
 private:
     int m_iSocket;
@@ -101,6 +122,9 @@ public:
     CHttpClient(char *szBindAddress);
     ~CHttpClient();
 };
+#ifdef _WIN32
+#pragma pack(pop)
+#endif
 
 //----------------------------------------------------
 
