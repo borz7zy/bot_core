@@ -71,7 +71,7 @@ int CHttpClient::ProcessURL(int iType, char *szURL, char *szPostData, char *szRe
 
 //----------------------------------------------------
 
-bool CHttpClient::GetHeaderValue(char *szHeaderName, char *szReturnBuffer, int iBufSize)
+bool CHttpClient::GetHeaderValue(const char *szHeaderName, char *szReturnBuffer, size_t iBufSize)
 {
     char *szHeaderStart;
     char *szHeaderEnd;

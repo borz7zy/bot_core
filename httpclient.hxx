@@ -91,7 +91,7 @@ private:
 public:
     int ProcessURL(int iType, char *szURL, char *szData, char *szReferer);
 
-    bool GetHeaderValue(char *szHeaderName, char *szReturnBuffer, int iBufSize);
+    bool GetHeaderValue(const char *szHeaderName, char *szReturnBuffer, size_t iBufSize);
     int GetResponseCode() { return m_Response.response_code; };
     int GetContentType() { return m_Response.content_type; };
     char *GetResponseHeaders() { return m_Response.header; };
