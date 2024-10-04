@@ -1,10 +1,12 @@
 #ifndef _GLOBAL_SDK_HXX
 #define _GLOBAL_SDK_HXX
 
+#ifndef PACKED
 #if defined(_MSC_VER)
 #define PACKED
 #else
 #define PACKED __attribute__((packed))
+#endif
 #endif
 
 extern "C"
