@@ -19,9 +19,15 @@ extern "C"
 
 typedef int (*IntFunctionPtr)(lua_State *L);
 
+#ifdef _WIN32
+#pragma pack(push, 1)
+#endif
 typedef struct myNative_Function_List
 {
     const char *nativeName PACKED;
     IntFunctionPtr funcPtr PACKED;
 } PACKED Native_Function_List;
+#endif
+#ifdef _WIN32
+#pragma pack(pop)
 #endif
