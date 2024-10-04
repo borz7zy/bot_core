@@ -109,7 +109,7 @@ private:
     bool Send(char *szData);
     int Recv(char *szBuffer, int iBufferSize);
 
-    void InitRequest(int iType, char *szURL, char *szPostData, char *szReferer);
+    void InitRequest(int iType, const char *szURL, const char *szPostData, const char *szReferer);
     void HandleEntity();
 
     void Process();

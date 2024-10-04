@@ -190,7 +190,7 @@ int CHttpClient::Recv(char *szBuffer, int iBufferSize)
 
 //----------------------------------------------------
 
-void CHttpClient::InitRequest(int iType, char *szURL, char *szPostData, char *szReferer)
+void CHttpClient::InitRequest(int iType, const char *szURL, const char *szPostData, const char *szReferer)
 {
     char port[60];          // port string
     char *port_char;        // position of ':' if any
