@@ -12,6 +12,8 @@ public:
 // runutil.h from samp source code (https://github.com/dashr9230/SA-MP/blob/main/announce/runutil.h)
 namespace RuntilH
 {
+#define BASE64_ENCOFING "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+
     void Util_UrlUnencode(char *enc);
     char Util_toupper(char c);
     char *Util_stristr(const char *String, const char *Pattern);
@@ -21,6 +23,8 @@ namespace RuntilH
     char *Util_strrev(char *str);
     char *Util_itoa(int v, char *s, int r);
     void Util_Base64Encode(char *cpInput, char *cpOutput);
+
+    int CanFileBeOpenedForReading(char *filename);
 }
 
 #endif

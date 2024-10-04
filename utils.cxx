@@ -1,5 +1,6 @@
 #include "utils.hxx"
 #include <cstdlib>
+#include <cstring>
 #include <stdio.h>
 #include <string>
 
@@ -215,8 +216,6 @@ char *RuntilH::Util_itoa(int v, char *s, int r)
 
 //----------------------------------------------------
 
-char Base64Encoding[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
 void RuntilH::Util_Base64Encode(char *cpInput, char *cpOutput)
 {
     int nIdx[4];
@@ -245,10 +244,10 @@ void RuntilH::Util_Base64Encode(char *cpInput, char *cpOutput)
             nIdx[3] = 64;
         }
 
-        *(cpOutput + 0) = *(Base64Encoding + nIdx[0]);
-        *(cpOutput + 1) = *(Base64Encoding + nIdx[1]);
-        *(cpOutput + 2) = *(Base64Encoding + nIdx[2]);
-        *(cpOutput + 3) = *(Base64Encoding + nIdx[3]);
+        *(cpOutput + 0) = *(BASE64_ENCOFING + nIdx[0]);
+        *(cpOutput + 1) = *(BASE64_ENCOFING + nIdx[1]);
+        *(cpOutput + 2) = *(BASE64_ENCOFING + nIdx[2]);
+        *(cpOutput + 3) = *(BASE64_ENCOFING + nIdx[3]);
         cpOutput += 4;
     }
 
@@ -259,21 +258,7 @@ void RuntilH::Util_Base64Encode(char *cpInput, char *cpOutput)
 
 //----------------------------------------------------
 
-void FilterInvalidNickChars(char *szString)
-{
-    while (*szString)
-    {
-        if (*szString < ' ' || *szString > 'z')
-        {
-            *szString = '_';
-        }
-        szString++;
-    }
-}
-
-//----------------------------------------------------
-
-int CanFileBeOpenedForReading(char *filename)
+int RuntilH::CanFileBeOpenedForReading(char *filename)
 {
     FILE *f;
     if (f = fopen(filename, "r"))
