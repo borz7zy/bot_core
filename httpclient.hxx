@@ -1,9 +1,14 @@
 #ifndef _HTTPCLIENT_HXX
 #define _HTTPCLIENT_HXX
 
-#define HTTP_GET 1
-#define HTTP_POST 2
-#define HTTP_HEAD 3
+//
+
+enum HTTP_METHOD
+{
+    HTTP_GET = 1,
+    HTTP_POST,
+    HTTP_HEAD,
+};
 
 //----------------------------------------------------
 
@@ -110,7 +115,7 @@ private:
     void Process();
 
 public:
-    int ProcessURL(int iType, char *szURL, char *szData, char *szReferer);
+    int ProcessURL(int iType, const char *szURL, char *szData, const char *szReferer);
 
     bool GetHeaderValue(const char *szHeaderName, char *szReturnBuffer, size_t iBufSize);
     int GetResponseCode() { return m_Response.response_code; };

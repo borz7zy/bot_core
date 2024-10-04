@@ -60,7 +60,7 @@ CHttpClient::~CHttpClient()
 
 //----------------------------------------------------
 
-int CHttpClient::ProcessURL(int iType, char *szURL, char *szPostData, char *szReferer)
+int CHttpClient::ProcessURL(int iType, const char *szURL, char *szPostData, const char *szReferer)
 {
     InitRequest(iType, szURL, szPostData, szReferer);
 
