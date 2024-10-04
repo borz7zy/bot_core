@@ -3,7 +3,10 @@
 #include <stdlib.h>
 
 #ifdef WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <windows.h>
+#pragma comment(lib, "ws2_32.lib") // Линковка с библиотекой Winsock
 #else
 #include <errno.h>
 #include <unistd.h>
