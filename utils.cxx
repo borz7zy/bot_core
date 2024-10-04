@@ -219,24 +219,28 @@ char *RuntilH::Util_itoa(int v, char *s, int r)
 void RuntilH::Util_Base64Encode(char *cpInput, char *cpOutput)
 {
     int nIdx[4];
-    while ('\0' != *cpInput)
+    while (*cpInput != '\0')
     {
         nIdx[0] = ((*cpInput) & 0xFC) >> 2;
         nIdx[1] = ((*cpInput) & 0x03) << 4;
         cpInput++;
-        if ('\0' != *cpInput)
+
+        if (*cpInput != '\0')
         {
             nIdx[1] |= ((*cpInput) & 0xF0) >> 4;
             nIdx[2] = ((*cpInput) & 0x0F) << 2;
             cpInput++;
-            if ('\0' != (*cpInput))
+
+            if (*cpInput != '\0')
             {
                 nIdx[2] |= ((*cpInput) & 0xC0) >> 6;
                 nIdx[3] = (*cpInput) & 0x3F;
                 cpInput++;
             }
             else
+            {
                 nIdx[3] = 64;
+            }
         }
         else
         {
@@ -244,16 +248,14 @@ void RuntilH::Util_Base64Encode(char *cpInput, char *cpOutput)
             nIdx[3] = 64;
         }
 
-        *(cpOutput + 0) = *(BASE64_ENCOFING + nIdx[0]);
-        *(cpOutput + 1) = *(BASE64_ENCOFING + nIdx[1]);
-        *(cpOutput + 2) = *(BASE64_ENCOFING + nIdx[2]);
-        *(cpOutput + 3) = *(BASE64_ENCOFING + nIdx[3]);
+        cpOutput[0] = BASE64_ENCOFING[nIdx[0]];
+        cpOutput[1] = BASE64_ENCOFING[nIdx[1]];
+        cpOutput[2] = BASE64_ENCOFING[nIdx[2]];
+        cpOutput[3] = BASE64_ENCOFING[nIdx[3]];
         cpOutput += 4;
     }
 
     *cpOutput = '\0';
-
-    return;
 }
 
 //----------------------------------------------------
