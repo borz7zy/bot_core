@@ -67,7 +67,7 @@ jobs:
     - name: Run prebuild-libs script
       shell: pwsh
       run: |
-        ./build.ps1 -ccomp "${{ matrix.c_compiler }}" `
+        ./prebuild-libs.ps1 -ccomp "${{ matrix.c_compiler }}" `
                     -cppcomp "${{ matrix.cpp_compiler }}" `
                     -buildtype "${{ matrix.build_type }}" `
                     -arch "${{ matrix.arch }}"
