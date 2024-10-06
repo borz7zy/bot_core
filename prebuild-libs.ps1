@@ -1,3 +1,10 @@
+param(
+    [string]$ccomp,
+    [string]$cppcomp,
+    [string]$buildtype = "Release",
+    [string]$arch
+)
+
 $os = $PSVersionTable.PSPlatform
 
 $scriptDir = Get-Location
@@ -16,7 +23,24 @@ New-Item -Path $buildDir -ItemType Directory -Force
 
 Set-Location -Path $buildDir
 
-$cmakeCommand = 'cmake -DCMAKE_INSTALL_PREFIX=../ -DBUILD_SHARED_LIBS=OFF ../../../libs/third_party/wolfssl'
+$cmakeCommand = "cmake -DCMAKE_INSTALL_PREFIX=../ -DBUILD_SHARED_LIBS=OFF ../../../libs/third_party/wolfssl"
+
+if ($ccomp) {
+    $cmakeCommand += " -DCMAKE_C_COMPILER=$ccomp"
+}
+if ($cppcomp) {
+    $cmakeCommand += " -DCMAKE_CXX_COMPILER=$cppcomp"
+}
+
+if ($buildtype) {
+    $cmakeCommand += " -DCMAKE_BUILD_TYPE=$buildtype"
+}
+
+if ($arch) {
+    $cmakeCommand += " -DCMAKE_OSX_ARCHITECTURES=$arch"
+}
+
+Write-Host "Команда CMake: $cmakeCommand"
 
 Invoke-Expression $cmakeCommand
 Invoke-Expression 'cmake --build .'
