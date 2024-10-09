@@ -43,7 +43,7 @@ if ($arch) {
 Write-Host "Команда CMake: $cmakeCommand"
 
 Invoke-Expression $cmakeCommand
-Invoke-Expression 'cmake --build .'
-Invoke-Expression 'cmake --install . --prefix ../'
+Invoke-Expression "cmake --build . --config $buildtype"
+Invoke-Expression "cmake --install . --prefix ../ --config $buildtype"
 
 Set-Location -Path $scriptDir
