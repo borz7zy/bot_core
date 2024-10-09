@@ -20,6 +20,13 @@ endif()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
+set(PREBUILDEDLIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/prebuilded-libs)
+
+set(wolfssl_root_dir ${PREBUILDEDLIBS_DIR}/wolfssl)
+list(APPEND CMAKE_PREFIX_PATH ${wolfssl_root_dir}/lib/cmake/wolfssl)
+find_package(Threads REQUIRED)
+find_package(wolfssl REQUIRED)
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/compiler)
 
 set(BOT_SRC
@@ -41,4 +48,4 @@ add_executable(bot_core ${BOT_SRC})
 target_include_directories(bot_core PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/third_party/lua
 )
-target_link_libraries(bot_core PRIVATE lua::lib lua::header)
+target_link_libraries(bot_core PRIVATE lua::lib lua::header wolfssl::wolfssl)
