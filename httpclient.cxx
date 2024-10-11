@@ -42,6 +42,24 @@ CHttpClient::CHttpClient(const char *szBindAddress)
     m_iError = HTTP_SUCCESS; // Request is successful until otherwise indicated
     m_iSocket = (-1);
 
+    // WolfSSL init
+    wolfSSL_Init();
+    method = wolfTLSv1_2_client_method();
+    if ((m_ssl_ctx = wolfSSL_CTX_new(method)) == NULL)
+    {
+        printf("Failed to wolfSSL_CTX_new\n");
+    }
+    assert(m_ssl_ctx != nullptr);
+
+    if (wolfSSL_CTX_set_default_verify_paths(m_ssl_ctx) != SSL_SUCCESS)
+    {
+        fprintf(stderr, "wolfSSL_CTX_set_default_verify_paths error\n");
+        wolfSSL_CTX_free(m_ssl_ctx);
+        return;
+    }
+
+    wolfSSL_CTX_set_verify(m_ssl_ctx, SSL_VERIFY_NONE, NULL);
+
     // Winsock init
 #ifdef WIN32
     WORD wVersionRequested;
@@ -55,6 +73,13 @@ CHttpClient::CHttpClient(const char *szBindAddress)
 
 CHttpClient::~CHttpClient()
 {
+
+    // WolfSSL cleanup
+    if (m_ssl_ctx)
+    {
+        wolfSSL_CTX_free(m_ssl_ctx);
+    }
+
     // Winsock cleanup
 #ifdef WIN32
     WSACleanup();
@@ -149,6 +174,28 @@ bool CHttpClient::Connect(const char *szHost, int iPort, const char *szBindAddre
         return false;
     }
 
+    // SSL-session init
+    m_ssl = wolfSSL_new(m_ssl_ctx);
+    if (m_ssl == NULL)
+    {
+        fprintf(stderr, "wolfSSL_new error\n");
+        return false;
+    }
+    assert(m_ssl != nullptr);
+
+    // Binding a socket to an SSL session
+    wolfSSL_set_fd(m_ssl, m_iSocket);
+
+    // Establishing a TLS connection
+    if (wolfSSL_connect(m_ssl) != SSL_SUCCESS)
+    {
+        int err = wolfSSL_get_error(m_ssl, 0);
+        printf("WolfSSL connect error: %d\n", err);
+        m_iError = HTTP_ERROR_SSL;
+        wolfSSL_free(m_ssl);
+        return false;
+    }
+
     return true;
 }
 
@@ -156,6 +203,14 @@ bool CHttpClient::Connect(const char *szHost, int iPort, const char *szBindAddre
 
 void CHttpClient::CloseConnection()
 {
+
+    if (m_ssl)
+    {
+        wolfSSL_shutdown(m_ssl);
+        wolfSSL_free(m_ssl);
+        m_ssl = nullptr;
+    }
+
 #ifdef WIN32
     closesocket(m_iSocket);
 #else
@@ -167,7 +222,8 @@ void CHttpClient::CloseConnection()
 
 bool CHttpClient::Send(const char *szData)
 {
-    if (send(m_iSocket, szData, strlen(szData), 0) < 0)
+    // if (send(m_iSocket, szData, strlen(szData), 0) < 0)
+    if (wolfSSL_write(m_ssl, szData, strlen(szData)) < 0)
     {
         m_iError = HTTP_ERROR_CANT_WRITE;
         return false;
@@ -179,7 +235,8 @@ bool CHttpClient::Send(const char *szData)
 
 int CHttpClient::Recv(char *szBuffer, int iBufferSize)
 {
-    return recv(m_iSocket, szBuffer, iBufferSize, 0);
+    // return recv(m_iSocket, szBuffer, iBufferSize, 0);
+    return wolfSSL_read(m_ssl, szBuffer, iBufferSize);
 }
 
 //----------------------------------------------------
@@ -231,6 +288,10 @@ void CHttpClient::InitRequest(int iType, const char *szURL, const char *szPostDa
     strcpy(m_Request.file, strchr(szUseURL, '/'));
 
     // Any special port used in the URL?
+    /*if (strncmp(szUseURL, "https://", 8) == 0)
+    {
+        m_Request.port = 443;
+    }*/
     if ((port_char = strchr(m_Request.host, ':')) != nullptr)
     {
         strcpy(port, port_char + 1);
@@ -241,6 +302,8 @@ void CHttpClient::InitRequest(int iType, const char *szURL, const char *szPostDa
     {
         m_Request.port = 80;
     }
+
+    strcpy(m_Request.file, strchr(szUseURL, '/'));
 }
 
 //----------------------------------------------------

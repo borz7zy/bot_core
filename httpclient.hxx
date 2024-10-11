@@ -4,6 +4,9 @@
 #include <cstddef>
 #include <cstring>
 
+#include <wolfssl/options.h>
+#include <wolfssl/ssl.h>
+
 enum HTTP_METHOD
 {
     HTTP_GET = 1,
@@ -20,6 +23,7 @@ enum HTTP_STATUS
     HTTP_ERROR_CANT_WRITE,
     HTTP_ERROR_CONTENT_TOO_BIG,
     HTTP_ERROR_MALFORMED_RESPONSE,
+    HTTP_ERROR_SSL,
 };
 
 enum CONTENT_TYPE
@@ -35,7 +39,7 @@ enum CONTENT_TYPE
     CONTENT_TYPE_CSS
 };
 
-#define USER_AGENT "botcore/0.1"
+#define USER_AGENT "bot_core/0.1"
 #define MAX_ENTITY_LENGTH 131072
 #define GET_FORMAT "GET %s HTTP/1.0\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\n\r\n"
 #define POST_FORMAT "POST %s HTTP/1.0\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\nContent-type: application/x-www-form-urlencoded\r\nContent-length: %zu\r\n\r\n%s"
@@ -98,6 +102,10 @@ private:
     int m_iError;
     char m_szBindAddress[256];
     int m_iHasBindAddress;
+
+    WOLFSSL_CTX *m_ssl_ctx;
+    WOLFSSL *m_ssl;
+    WOLFSSL_METHOD *method;
 
     bool Connect(const char *szHost, int iPort, const char *szBindAddress = nullptr);
     void CloseConnection();
