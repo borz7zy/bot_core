@@ -40,7 +40,9 @@ if ($arch) {
     $cmakeCommand += " -DCMAKE_OSX_ARCHITECTURES=$arch"
 }
 
-Write-Host "Команда CMake: $cmakeCommand"
+$cmakeCommand += " -DWOLFSSL_OPENSSLALL=ON"
+
+Write-Host "CMake Commad: $cmakeCommand"
 
 Invoke-Expression $cmakeCommand
 Invoke-Expression "cmake --build . --config $buildtype"
