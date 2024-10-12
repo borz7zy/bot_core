@@ -7,6 +7,7 @@
 #endif
 #include <cstring>
 #include <sstream>
+#include <algorithm>
 #include "globals.hxx"
 
 Core::Core()
