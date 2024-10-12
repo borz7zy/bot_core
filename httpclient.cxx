@@ -58,7 +58,9 @@ CHttpClient::CHttpClient(const char *szBindAddress)
         return;
     }
 
+#ifdef DEBUG
     wolfSSL_CTX_set_verify(m_ssl_ctx, SSL_VERIFY_NONE, NULL);
+#endif
 
     // Winsock init
 #ifdef WIN32
