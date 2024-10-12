@@ -92,6 +92,22 @@ CHttpClient::~CHttpClient()
 
 int CHttpClient::ProcessURL(int iType, const char *szURL, const char *szPostData, const char *szReferer)
 {
+    if (strncmp(szURL, "http://", 7) == 0)
+    {
+        tls_protocol = false;
+        szURL += 7;
+    }
+    else if (strncmp(szURL, "https://", 8) == 0)
+    {
+        tls_protocol = true;
+        szURL += 8;
+    }
+    else
+    {
+        m_iError = HTTP_ERROR_BAD_URL;
+        return m_iError;
+    }
+
     InitRequest(iType, szURL, szPostData, szReferer);
     Process();
     return m_iError;
@@ -176,26 +192,29 @@ bool CHttpClient::Connect(const char *szHost, int iPort, const char *szBindAddre
         return false;
     }
 
-    // SSL-session init
-    m_ssl = wolfSSL_new(m_ssl_ctx);
-    if (m_ssl == NULL)
+    if (tls_protocol)
     {
-        fprintf(stderr, "wolfSSL_new error\n");
-        return false;
-    }
-    assert(m_ssl != nullptr);
+        // SSL-session init
+        m_ssl = wolfSSL_new(m_ssl_ctx);
+        if (m_ssl == NULL)
+        {
+            fprintf(stderr, "wolfSSL_new error\n");
+            return false;
+        }
+        assert(m_ssl != nullptr);
 
-    // Binding a socket to an SSL session
-    wolfSSL_set_fd(m_ssl, m_iSocket);
+        // Binding a socket to an SSL session
+        wolfSSL_set_fd(m_ssl, m_iSocket);
 
-    // Establishing a TLS connection
-    if (wolfSSL_connect(m_ssl) != SSL_SUCCESS)
-    {
-        int err = wolfSSL_get_error(m_ssl, 0);
-        printf("WolfSSL connect error: %d\n", err);
-        m_iError = HTTP_ERROR_SSL;
-        wolfSSL_free(m_ssl);
-        return false;
+        // Establishing a TLS connection
+        if (wolfSSL_connect(m_ssl) != SSL_SUCCESS)
+        {
+            int err = wolfSSL_get_error(m_ssl, 0);
+            printf("WolfSSL connect error: %d\n", err);
+            m_iError = HTTP_ERROR_SSL;
+            wolfSSL_free(m_ssl);
+            return false;
+        }
     }
 
     return true;
@@ -224,11 +243,21 @@ void CHttpClient::CloseConnection()
 
 bool CHttpClient::Send(const char *szData)
 {
-    // if (send(m_iSocket, szData, strlen(szData), 0) < 0)
-    if (wolfSSL_write(m_ssl, szData, strlen(szData)) < 0)
+    if (tls_protocol)
     {
-        m_iError = HTTP_ERROR_CANT_WRITE;
-        return false;
+        if (wolfSSL_write(m_ssl, szData, strlen(szData)) < 0)
+        {
+            m_iError = HTTP_ERROR_CANT_WRITE;
+            return false;
+        }
+    }
+    else
+    {
+        if (send(m_iSocket, szData, strlen(szData), 0) < 0)
+        {
+            m_iError = HTTP_ERROR_CANT_WRITE;
+            return false;
+        }
     }
     return true;
 }
@@ -237,8 +266,11 @@ bool CHttpClient::Send(const char *szData)
 
 int CHttpClient::Recv(char *szBuffer, int iBufferSize)
 {
-    // return recv(m_iSocket, szBuffer, iBufferSize, 0);
-    return wolfSSL_read(m_ssl, szBuffer, iBufferSize);
+    if (tls_protocol)
+    {
+        return wolfSSL_read(m_ssl, szBuffer, iBufferSize);
+    }
+    return recv(m_iSocket, szBuffer, iBufferSize, 0);
 }
 
 //----------------------------------------------------
@@ -249,7 +281,7 @@ void CHttpClient::InitRequest(int iType, const char *szURL, const char *szPostDa
     const char *port_char;  // position of ':' if any
     unsigned int slash_pos; // position of first '/' numeric
     const char *slash_ptr;  //
-    char szUseURL[512];     // in case we have to cat something to it.
+    char szUseURL[2048];    // in case we have to cat something to it.
 
     memset(&m_Request, 0, sizeof(HTTP_REQUEST));
 
@@ -289,20 +321,20 @@ void CHttpClient::InitRequest(int iType, const char *szURL, const char *szPostDa
     // Copy the rest of the URL to the file string.
     strcpy(m_Request.file, strchr(szUseURL, '/'));
 
-    // Any special port used in the URL?
-    /*if (strncmp(szUseURL, "https://", 8) == 0)
+    if (tls_protocol)
     {
         m_Request.port = 443;
-    }*/
+    }
+    else
+    {
+        m_Request.port = 80;
+    }
+    // Any special port used in the URL?
     if ((port_char = strchr(m_Request.host, ':')) != nullptr)
     {
         strcpy(port, port_char + 1);
         *const_cast<char *>(port_char) = '\0';
         m_Request.port = atoi(port);
-    }
-    else
-    {
-        m_Request.port = 80;
     }
 
     strcpy(m_Request.file, strchr(szUseURL, '/'));

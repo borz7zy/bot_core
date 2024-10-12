@@ -18,6 +18,7 @@ enum HTTP_STATUS
 {
     HTTP_SUCCESS,
     HTTP_ERROR_BAD_HOST,
+    HTTP_ERROR_BAD_URL,
     HTTP_ERROR_NO_SOCKET,
     HTTP_ERROR_CANT_CONNECT,
     HTTP_ERROR_CANT_WRITE,
@@ -61,10 +62,10 @@ typedef struct
 {
     unsigned short port PACKED;
     int rtype PACKED;
-    char host[256] PACKED;
+    char host[2048] PACKED;
     char file[1024] PACKED;
     char data[16384] PACKED;
-    char referer[256] PACKED;
+    char referer[2048] PACKED;
 } PACKED HTTP_REQUEST;
 
 #ifdef _WIN32
@@ -106,6 +107,7 @@ private:
     WOLFSSL_CTX *m_ssl_ctx;
     WOLFSSL *m_ssl;
     WOLFSSL_METHOD *method;
+    bool tls_protocol;
 
     bool Connect(const char *szHost, int iPort, const char *szBindAddress = nullptr);
     void CloseConnection();
