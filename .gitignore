@@ -2,5 +2,6 @@
 /experiments/
 .vscode/
 /prebuilded-libs/
+/plugins/
 
 .DS_Store
