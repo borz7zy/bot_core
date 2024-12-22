@@ -42,6 +42,7 @@ set(BOT_SRC
     minor_scripts.cxx
     main_script.cxx
     httpclient.cxx
+    asynchttp.cxx
 )
 
 add_executable(bot_core ${BOT_SRC})

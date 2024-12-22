@@ -5,7 +5,7 @@
 #include <memory>
 #include <sstream>
 #include <fstream>
-#include <iomanip> // Добавлен для std::hex
+#include <iomanip>
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -23,7 +23,6 @@
 #endif
 
 #include "httpclient.hxx"
-// #include "runutil.h"
 #include "utils.hxx"
 
 //----------------------------------------------------

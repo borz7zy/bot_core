@@ -51,7 +51,6 @@ enum CONTENT_TYPE
 #define USER_AGENT "bot_core/0.1"
 #define MAX_ENTITY_LENGTH 131072
 
-// Форматы запросов
 #define GET_FORMAT "%s %s HTTP/1.1\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\n"
 #define POST_FORMAT "%s %s HTTP/1.1\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\nContent-Type: %s\r\nContent-Length: %zu\r\n"
 #define HEAD_FORMAT "%s %s HTTP/1.1\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\n"
