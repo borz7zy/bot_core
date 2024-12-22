@@ -20,14 +20,25 @@ extern "C"
 typedef int (*IntFunctionPtr)(lua_State *L);
 
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#ifndef PRAGMA_PACK_PUSH_ONCE
+#define PRAGMA_PACK_PUSH_ONCE
 #pragma pack(push, 1)
 #endif
-typedef struct myNative_Function_List
+#endif
+
+typedef struct Native_Function_List
 {
     const char *nativeName PACKED;
     IntFunctionPtr funcPtr PACKED;
 } PACKED Native_Function_List;
-#endif
+
 #ifdef _WIN32
+#ifndef PRAGMA_PACK_POP_ONCE
+#define PRAGMA_PACK_POP_ONCE
 #pragma pack(pop)
+#endif
+#endif
+
 #endif
