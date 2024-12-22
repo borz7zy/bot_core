@@ -3,6 +3,9 @@
 
 #include <cstddef>
 #include <cstring>
+#include <vector>
+#include <string>
+#include <map>
 
 #include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
@@ -12,6 +15,11 @@ enum HTTP_METHOD
     HTTP_GET = 1,
     HTTP_POST,
     HTTP_HEAD,
+    HTTP_PUT,
+    HTTP_DELETE,
+    HTTP_PATCH,
+    HTTP_OPTIONS,
+    HTTP_TRACE
 };
 
 enum HTTP_STATUS
@@ -42,9 +50,16 @@ enum CONTENT_TYPE
 
 #define USER_AGENT "bot_core/0.1"
 #define MAX_ENTITY_LENGTH 131072
-#define GET_FORMAT "GET %s HTTP/1.0\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\n\r\n"
-#define POST_FORMAT "POST %s HTTP/1.0\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\nContent-type: application/x-www-form-urlencoded\r\nContent-length: %zu\r\n\r\n%s"
-#define HEAD_FORMAT "HEAD %s HTTP/1.0\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\n\r\n"
+
+// Форматы запросов
+#define GET_FORMAT "%s %s HTTP/1.1\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\n"
+#define POST_FORMAT "%s %s HTTP/1.1\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\nContent-Type: %s\r\nContent-Length: %zu\r\n"
+#define HEAD_FORMAT "%s %s HTTP/1.1\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\n"
+#define PUT_FORMAT "%s %s HTTP/1.1\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\nContent-Type: %s\r\nContent-Length: %zu\r\n"
+#define DELETE_FORMAT "%s %s HTTP/1.1\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\n"
+#define PATCH_FORMAT "%s %s HTTP/1.1\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\nContent-Type: %s\r\nContent-Length: %zu\r\n"
+#define OPTIONS_FORMAT "%s %s HTTP/1.1\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\n"
+#define TRACE_FORMAT "%s %s HTTP/1.1\r\nAccept: */*\r\nUser-Agent: %s\r\nReferer: http://%s\r\nHost: %s\r\n"
 
 #ifndef PACKED
 #if defined(_MSC_VER)
@@ -94,6 +109,16 @@ typedef struct
 #pragma pack(push, 1)
 #endif
 
+// Structure to represent a POST parameter
+struct PostParameter
+{
+    std::string name;
+    std::string value;
+    std::string filename;    // For file uploads
+    std::string contentType; // For file uploads
+    bool isFile = false;
+};
+
 class PACKED CHttpClient
 {
 private:
@@ -109,18 +134,40 @@ private:
     WOLFSSL_METHOD *method;
     bool tls_protocol;
 
+    std::map<std::string, std::string> m_customHeaders;
+
     bool Connect(const char *szHost, int iPort, const char *szBindAddress = nullptr);
     void CloseConnection();
     bool Send(const char *szData);
+    bool Send(const char *szData, size_t len); // Added for sending binary data
     int Recv(char *szBuffer, int iBufferSize);
 
     void InitRequest(int iType, const char *szURL, const char *szPostData, const char *szReferer);
     void HandleEntity();
     void Process();
 
-public:
-    int ProcessURL(int iType, const char *szURL, const char *szData, const char *szReferer);
+    std::string prepareUrlEncodedData(const std::vector<PostParameter> &params);
+    std::string prepareMultipartData(const std::vector<PostParameter> &params, std::string &boundary);
 
+    bool sendDataRequest(int iType, const std::string &postData, const char *szURL, const char *szReferer, const char *contentType = nullptr);
+
+    bool sendDataRequest(int iType, const std::vector<PostParameter> &params, const char *szURL, const char *szReferer);
+
+    void addHeaders(std::string &request_head);
+
+public:
+    void AddCustomHeader(const std::string &name, const std::string &value)
+    {
+        m_customHeaders[name] = value;
+    }
+
+    void ClearCustomHeaders()
+    {
+        m_customHeaders.clear();
+    }
+
+    int ProcessURL(int iType, const char *szURL, const char *szData, const char *szReferer);
+    int ProcessURL(int iType, const char *szURL, const std::vector<PostParameter> &params, const char *szReferer);
     bool GetHeaderValue(const char *szHeaderName, char *szReturnBuffer, size_t iBufSize);
     int GetResponseCode() const { return m_Response.response_code; }
     int GetContentType() const { return m_Response.content_type; }

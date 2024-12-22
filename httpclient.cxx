@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <cassert>
 #include <memory>
+#include <sstream>
+#include <fstream>
+#include <iomanip> // Добавлен для std::hex
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -92,6 +95,12 @@ CHttpClient::~CHttpClient()
 
 int CHttpClient::ProcessURL(int iType, const char *szURL, const char *szPostData, const char *szReferer)
 {
+    if (iType != HTTP_GET && iType != HTTP_HEAD && szPostData)
+    {
+        PostParameter param;
+        param.value = szPostData ? szPostData : "";
+        return ProcessURL(iType, szURL, {param}, szReferer);
+    }
     if (strncmp(szURL, "http://", 7) == 0)
     {
         tls_protocol = false;
@@ -109,6 +118,34 @@ int CHttpClient::ProcessURL(int iType, const char *szURL, const char *szPostData
     }
 
     InitRequest(iType, szURL, szPostData, szReferer);
+    Process();
+    return m_iError;
+}
+int CHttpClient::ProcessURL(int iType, const char *szURL, const std::vector<PostParameter> &params, const char *szReferer)
+{
+
+    if (strncmp(szURL, "http://", 7) == 0)
+    {
+        tls_protocol = false;
+        szURL += 7;
+    }
+    else if (strncmp(szURL, "https://", 8) == 0)
+    {
+        tls_protocol = true;
+        szURL += 8;
+    }
+    else
+    {
+        m_iError = HTTP_ERROR_BAD_URL;
+        return m_iError;
+    }
+
+    if (iType == HTTP_POST || iType == HTTP_PUT || iType == HTTP_PATCH)
+    {
+        return sendDataRequest(iType, params, szURL, szReferer);
+    }
+
+    InitRequest(iType, szURL, nullptr, szReferer);
     Process();
     return m_iError;
 }
@@ -243,9 +280,14 @@ void CHttpClient::CloseConnection()
 
 bool CHttpClient::Send(const char *szData)
 {
+    return Send(szData, strlen(szData));
+}
+
+bool CHttpClient::Send(const char *szData, size_t len)
+{
     if (tls_protocol)
     {
-        if (wolfSSL_write(m_ssl, szData, strlen(szData)) < 0)
+        if (wolfSSL_write(m_ssl, szData, len) < 0)
         {
             m_iError = HTTP_ERROR_CANT_WRITE;
             return false;
@@ -253,7 +295,7 @@ bool CHttpClient::Send(const char *szData)
     }
     else
     {
-        if (send(m_iSocket, szData, strlen(szData), 0) < 0)
+        if (send(m_iSocket, szData, len, 0) < 0)
         {
             m_iError = HTTP_ERROR_CANT_WRITE;
             return false;
@@ -298,8 +340,7 @@ void CHttpClient::InitRequest(int iType, const char *szURL, const char *szPostDa
         strncpy(m_Request.referer, szReferer, sizeof(m_Request.referer) - 1);
         m_Request.referer[sizeof(m_Request.referer) - 1] = '\0';
     }
-
-    if (iType == HTTP_POST)
+    if (iType != HTTP_GET && iType != HTTP_HEAD && szPostData != nullptr)
     {
         strncpy(m_Request.data, szPostData, sizeof(m_Request.data) - 1);
         m_Request.data[sizeof(m_Request.data) - 1] = '\0';
@@ -341,41 +382,199 @@ void CHttpClient::InitRequest(int iType, const char *szURL, const char *szPostDa
 }
 
 //----------------------------------------------------
+// Helper function to URL encode a string
+static std::string urlEncode(const std::string &str)
+{
+    std::ostringstream escaped;
+    escaped.fill('0');
+    escaped << std::hex;
+
+    for (char c : str)
+    {
+        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
+        {
+            escaped << c;
+            continue;
+        }
+        escaped << '%' << std::setw(2) << int((unsigned char)c);
+    }
+    return escaped.str();
+}
+
+std::string CHttpClient::prepareUrlEncodedData(const std::vector<PostParameter> &params)
+{
+    std::string postData;
+    for (size_t i = 0; i < params.size(); ++i)
+    {
+        postData += urlEncode(params[i].name) + "=" + urlEncode(params[i].value);
+        if (i < params.size() - 1)
+        {
+            postData += "&";
+        }
+    }
+    return postData;
+}
+
+std::string CHttpClient::prepareMultipartData(const std::vector<PostParameter> &params, std::string &boundary)
+{
+    std::string multipartData;
+    boundary = "---------------------------" + std::to_string(std::rand()); // Generate a simple boundary
+
+    for (const auto &param : params)
+    {
+        multipartData += "--" + boundary + "\r\n";
+
+        if (param.isFile)
+        {
+            multipartData += "Content-Disposition: form-data; name=\"" + param.name + "\"; filename=\"" + param.filename + "\"\r\n";
+            multipartData += "Content-Type: " + param.contentType + "\r\n\r\n";
+
+            // Read file content
+            std::ifstream file(param.filename, std::ios::binary);
+            if (file.is_open())
+            {
+                std::ostringstream fileContentStream;
+                fileContentStream << file.rdbuf();
+                multipartData += fileContentStream.str();
+            }
+            else
+            {
+                fprintf(stderr, "Error: Could not open file for multipart: %s\n", param.filename.c_str());
+            }
+            file.close();
+            multipartData += "\r\n";
+        }
+        else
+        {
+            multipartData += "Content-Disposition: form-data; name=\"" + param.name + "\"\r\n\r\n";
+            multipartData += param.value + "\r\n";
+        }
+    }
+    multipartData += "--" + boundary + "--\r\n";
+    return multipartData;
+}
+
+void CHttpClient::addHeaders(std::string &request_head)
+{
+    for (const auto &header : m_customHeaders)
+    {
+        request_head += header.first + ": " + header.second + "\r\n";
+    }
+    request_head += "\r\n";
+}
+
+bool CHttpClient::sendDataRequest(int iType, const std::vector<PostParameter> &params, const char *szURL, const char *szReferer)
+{
+    std::string postData;
+    std::string boundary;
+    bool isMultipart = false;
+    const char *contentType = nullptr;
+
+    for (const auto &param : params)
+    {
+        if (param.isFile)
+        {
+            isMultipart = true;
+            break;
+        }
+    }
+
+    if (isMultipart)
+    {
+        postData = prepareMultipartData(params, boundary);
+        contentType = ("multipart/form-data; boundary=" + boundary).c_str();
+    }
+    else
+    {
+        postData = prepareUrlEncodedData(params);
+        contentType = "application/x-www-form-urlencoded";
+    }
+
+    return sendDataRequest(iType, postData, szURL, szReferer, contentType);
+}
+
+bool CHttpClient::sendDataRequest(int iType, const std::string &postData, const char *szURL, const char *szReferer, const char *contentType)
+{
+    int header_len;
+    char request_head[16384];
+    const char *methodStr;
+
+    InitRequest(iType, szURL, postData.c_str(), szReferer);
+
+    if (!Connect(m_Request.host, m_Request.port, m_iHasBindAddress ? m_szBindAddress : nullptr))
+    {
+        return false;
+    }
+
+    switch (iType)
+    {
+    case HTTP_POST:
+        methodStr = "POST";
+        break;
+    case HTTP_PUT:
+        methodStr = "PUT";
+        break;
+    case HTTP_PATCH:
+        methodStr = "PATCH";
+        break;
+    default:
+        methodStr = "POST";
+    }
+    header_len = snprintf(request_head, sizeof(request_head), POST_FORMAT,
+                          methodStr, m_Request.file, USER_AGENT, m_Request.referer, m_Request.host,
+                          contentType ? contentType : "application/x-www-form-urlencoded", postData.length());
+
+    std::string headersStr = request_head;
+    addHeaders(headersStr);
+
+    if (!Send(headersStr.c_str()))
+        return false;
+    if (!Send(postData.c_str(), postData.length()))
+        return false;
+
+    HandleEntity();
+
+    return true;
+}
+//----------------------------------------------------
 
 void CHttpClient::Process()
 {
     int header_len;
     char request_head[16384];
-
+    const char *methodStr;
     if (!Connect(m_Request.host, m_Request.port, m_iHasBindAddress ? m_szBindAddress : nullptr))
     {
         return;
     }
-
     // Build the HTTP Header
     switch (m_Request.rtype)
     {
     case HTTP_GET:
-        header_len = snprintf(request_head, sizeof(request_head), GET_FORMAT,
-                              m_Request.file, USER_AGENT, m_Request.referer, m_Request.host);
+        methodStr = "GET";
         break;
-
     case HTTP_HEAD:
-        header_len = snprintf(request_head, sizeof(request_head), HEAD_FORMAT,
-                              m_Request.file, USER_AGENT, m_Request.referer, m_Request.host);
+        methodStr = "HEAD";
         break;
-
-    case HTTP_POST:
-        header_len = snprintf(request_head, sizeof(request_head), POST_FORMAT,
-                              m_Request.file, USER_AGENT, m_Request.referer, m_Request.host,
-                              strlen(m_Request.data), m_Request.data);
+    case HTTP_DELETE:
+        methodStr = "DELETE";
         break;
-
+    case HTTP_OPTIONS:
+        methodStr = "OPTIONS";
+        break;
+    case HTTP_TRACE:
+        methodStr = "TRACE";
+        break;
     default:
         return;
     }
+    header_len = snprintf(request_head, sizeof(request_head), GET_FORMAT,
+                          methodStr, m_Request.file, USER_AGENT, m_Request.referer, m_Request.host);
 
-    if (!Send(request_head))
+    std::string headersStr = request_head;
+    addHeaders(headersStr);
+
+    if (!Send(headersStr.c_str()))
         return;
 
     HandleEntity();
