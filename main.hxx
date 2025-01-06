@@ -13,6 +13,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cstring>
+#include <atomic>
 
 #include "globals.hxx"
 #include "minor_scripts.hxx"
