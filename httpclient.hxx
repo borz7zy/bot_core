@@ -11,6 +11,11 @@
 #include <string>
 #include <map>
 
+#ifdef WIN32
+#define WOLFSSL_USER_SETTINGS
+#define USE_WINDOWS_API
+#endif
+
 #include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
 
