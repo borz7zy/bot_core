@@ -8,6 +8,7 @@
 #include <iomanip>
 
 #ifdef WIN32
+#define _WINSOCKAPI_
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
