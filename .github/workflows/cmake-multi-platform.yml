@@ -33,21 +33,21 @@ jobs:
             arch: arm64
           # Ubuntu
           - os: ubuntu-22.04
-            c_compiler: clang
-            cpp_compiler: clang++
+            c_compiler: gcc
+            cpp_compiler: g++
             arch: x86
           - os: ubuntu-22.04
-            c_compiler: clang
-            cpp_compiler: clang++
+            c_compiler: gcc
+            cpp_compiler: g++
             arch: x86_64
           # macOS
           - os: macos-latest
-            c_compiler: clang
-            cpp_compiler: clang++
+            c_compiler: gcc
+            cpp_compiler: g++
             arch: x86_64
           - os: macos-latest
-            c_compiler: clang
-            cpp_compiler: clang++
+            c_compiler: gcc
+            cpp_compiler: g++
             arch: arm64
         exclude:
           - os: ubuntu-22.04
