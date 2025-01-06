@@ -1,3 +1,7 @@
+#ifdef WIN32
+#pragma once
+#endif
+
 #ifndef _ASYNCHTTP_HXX
 #define _ASYNCHTTP_HXX
 

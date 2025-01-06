@@ -1,3 +1,7 @@
+#ifdef WIN32
+#pragma once
+#endif
+
 #ifndef _UTILS_HXX
 #define _UTILS_HXX
 

@@ -1,3 +1,7 @@
+#ifdef WIN32
+#pragma once
+#endif
+
 #ifndef _LUA_NATIVES_HXX
 #define _LUA_NATIVES_HXX
 

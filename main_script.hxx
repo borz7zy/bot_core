@@ -1,3 +1,7 @@
+#ifdef WIN32
+#pragma once
+#endif
+
 #ifndef _MAIN_SCRIPTS_HXX
 #define _MAIN_SCRIPTS_HXX
 

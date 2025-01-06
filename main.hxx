@@ -1,3 +1,7 @@
+#ifdef WIN32
+#pragma once
+#endif
+
 #ifndef _MAIN_HXX
 #define _MAIN_HXX
 

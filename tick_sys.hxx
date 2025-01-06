@@ -1,3 +1,7 @@
+#ifdef WIN32
+#pragma once
+#endif
+
 #ifndef _TICK_SYS_HXX
 #define _TICK_SYS_HXX
 

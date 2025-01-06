@@ -1,3 +1,7 @@
+#ifdef WIN32
+#pragma once
+#endif
+
 #ifndef _PLUGIN_MANAGER_HXX
 #define _PLUGIN_MANAGER_HXX
 

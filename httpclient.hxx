@@ -1,3 +1,7 @@
+#ifdef WIN32
+#pragma once
+#endif
+
 #ifndef _HTTPCLIENT_HXX
 #define _HTTPCLIENT_HXX
 

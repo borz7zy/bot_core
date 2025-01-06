@@ -1,3 +1,7 @@
+#ifdef WIN32
+#pragma once
+#endif
+
 #ifndef _MINOR_SCRIPTS_HXX
 #define _MINOR_SCRIPTS_HXX
 

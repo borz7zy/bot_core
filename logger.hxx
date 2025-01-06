@@ -1,3 +1,7 @@
+#ifdef WIN32
+#pragma once
+#endif
+
 #ifndef _LOGGER_HXX
 #define _LOGGER_HXX
 

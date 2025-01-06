@@ -1,3 +1,7 @@
+#ifdef WIN32
+#pragma once
+#endif
+
 #ifndef _GLOBAL_SDK_HXX
 #define _GLOBAL_SDK_HXX
 

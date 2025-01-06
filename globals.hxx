@@ -1,3 +1,7 @@
+#ifdef WIN32
+#pragma once
+#endif
+
 #ifndef _GLOBALS_HXX
 #define _GLOBALS_HXX
 

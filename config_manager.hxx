@@ -1,3 +1,7 @@
+#ifdef WIN32
+#pragma once
+#endif
+
 #ifndef _CONFIG_MANAGER_HXX
 #define _CONFIG_MANAGER_HXX
 
