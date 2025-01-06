@@ -1,18 +1,19 @@
 #ifndef _MAIN_HXX
 #define _MAIN_HXX
 
-#include "globals.hxx"
-
-#include "minor_scripts.hxx"
-#include "main_script.hxx"
-#include "plugin_manager.hxx"
-#include "lua_natives.hxx"
-#include "tick_sys.hxx"
 #include <vector>
 #include <string>
 #include <stdexcept>
 #include <memory>
 #include <csignal>
+#include <sstream>
+
+#include "globals.hxx"
+#include "minor_scripts.hxx"
+#include "main_script.hxx"
+#include "plugin_manager.hxx"
+#include "lua_natives.hxx"
+#include "tick_sys.hxx"
 #include "global_sdk.hxx"
 
 std::atomic<bool> g_shutdownRequested = false;
