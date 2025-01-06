@@ -1,4 +1,4 @@
--b0.1.1 (29 sep 2024 - ?)
+-b0.1.1 (29 sep 2024 - 6 jan 2024)
     - Config and paths are now created automatically if the config was not found in the root folder
     - Replaced heavy log library with simple one
     - in lua_State from standard libraries now only "string, math, table" is loaded
