@@ -3,5 +3,5 @@
 .vscode/
 /prebuilded-libs/
 /plugins/
-
+/src/
 .DS_Store
