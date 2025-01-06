@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include "./../global_sdk.hxx"
-#include "./../globals.hxx"
+#include "./../src/global_sdk.hxx"
+#include "./../src/globals.hxx"
 
 int writer(lua_State *L, const void *p, size_t sz, void *ud)
 {

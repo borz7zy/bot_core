@@ -9,7 +9,7 @@ endif()
 
 set(bot_core_compiler_src
     compiler.cxx
-    ${CMAKE_CURRENT_SOURCE_DIR}/../logger.cxx
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/logger.cxx
 )
 
 add_executable(bot_core_compiler ${bot_core_compiler_src})

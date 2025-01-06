@@ -23,16 +23,16 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/compiler)
 
 set(BOT_SRC
-    main.cxx
-    utils.cxx
-    globals.cxx
-    logger.cxx
-    config_manager.cxx
-    tick_sys.cxx
-    lua_natives.cxx
-    plugin_manager.cxx
-    minor_scripts.cxx
-    main_script.cxx
+    src/main.cxx
+    src/utils.cxx
+    src/globals.cxx
+    src/logger.cxx
+    src/config_manager.cxx
+    src/tick_sys.cxx
+    src/lua_natives.cxx
+    src/plugin_manager.cxx
+    src/minor_scripts.cxx
+    src/main_script.cxx
 )
 
 add_executable(bot_core ${BOT_SRC})
