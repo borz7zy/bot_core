@@ -8,6 +8,7 @@
     - a class for asynchronous work with http client has been implemented
     - integration of asynchronous http class into lua
     - and refactor code
+    - // temporary failure of the built-in http client \\
 -b0.1.0 (28 sep 2024)
     First beta release!
     build logs: https://github.com/borz7zy/bot_core/actions/runs/11087594299

@@ -68,13 +68,13 @@ jobs:
           echo "build-output-dir=${{ github.workspace }}/build/${{ matrix.os }}-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
           echo "artifact-name=build-${{ matrix.build_type }}-${{ matrix.os }}-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
 
-      - name: Run prebuild-libs script
-        shell: pwsh
-        run: |
-          ./prebuild-libs.ps1 -ccomp "${{ matrix.c_compiler }}" `
-                      -cppcomp "${{ matrix.cpp_compiler }}" `
-                      -buildtype "${{ matrix.build_type }}" `
-                      -arch "${{ matrix.arch }}"
+      # - name: Run prebuild-libs script
+      #   shell: pwsh
+      #   run: |
+      #     ./prebuild-libs.ps1 -ccomp "${{ matrix.c_compiler }}" `
+      #                 -cppcomp "${{ matrix.cpp_compiler }}" `
+      #                 -buildtype "${{ matrix.build_type }}" `
+      #                 -arch "${{ matrix.arch }}"
 
       - name: Configure CMake
         shell: pwsh

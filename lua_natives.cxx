@@ -6,9 +6,6 @@
 
 typedef Native_Function_List *(*RegisterNativesFunc)();
 
-// Static instance of AsyncHttp
-AsyncHttp LuaNatives::asyncHttp;
-
 void LuaNatives::CallGetNatives(lua_State *L, void *plugin, const char *lib_name)
 {
     RegisterNativesFunc registerNatives = nullptr;
@@ -100,90 +97,90 @@ int LuaNatives::native_print(lua_State *L)
 }
 
 //---------------------Async HTTP functions-------------------------------------
-int LuaNatives::native_http_set_bind_address(lua_State *L)
-{
-    const char *address = luaL_optstring(L, 1, nullptr);
-    asyncHttp.SetBindAddress(address);
-    return 0;
-}
+// int LuaNatives::native_http_set_bind_address(lua_State *L)
+// {
+//     const char *address = luaL_optstring(L, 1, nullptr);
+//     asyncHttp.SetBindAddress(address);
+//     return 0;
+// }
 
-int LuaNatives::native_http_request(lua_State *L)
-{
-    int method = luaL_checkinteger(L, 1);           // Get HTTP method type
-    const char *url = luaL_checkstring(L, 2);       // URL
-    const char *referer = luaL_optstring(L, 3, ""); // Optional referer
+// int LuaNatives::native_http_request(lua_State *L)
+// {
+//     int method = luaL_checkinteger(L, 1);           // Get HTTP method type
+//     const char *url = luaL_checkstring(L, 2);       // URL
+//     const char *referer = luaL_optstring(L, 3, ""); // Optional referer
 
-    std::vector<PostParameter> params;
-    if (lua_istable(L, 4))
-    {
-        lua_pushnil(L); // push a nil key onto the stack to start iterate
-        while (lua_next(L, 4) != 0)
-        { // iterate over the table
-            //  key is at -2 and value at -1
-            if (lua_istable(L, -1))
-            {
-                lua_getfield(L, -1, "name");
-                const char *name = luaL_checkstring(L, -1);
-                lua_pop(L, 1);
-                lua_getfield(L, -1, "value");
-                const char *value = luaL_optstring(L, -1, "");
-                lua_pop(L, 1);
-                lua_getfield(L, -1, "filename");
-                const char *filename = luaL_optstring(L, -1, "");
-                lua_pop(L, 1);
-                lua_getfield(L, -1, "contentType");
-                const char *contentType = luaL_optstring(L, -1, "");
-                lua_pop(L, 1);
-                lua_getfield(L, -1, "isFile");
-                bool isFile = lua_toboolean(L, -1);
-                lua_pop(L, 1);
-                params.push_back({name, value, filename, contentType, isFile});
-            }
-            lua_pop(L, 1); // removes value
-        }
-    }
+//     std::vector<PostParameter> params;
+//     if (lua_istable(L, 4))
+//     {
+//         lua_pushnil(L); // push a nil key onto the stack to start iterate
+//         while (lua_next(L, 4) != 0)
+//         { // iterate over the table
+//             //  key is at -2 and value at -1
+//             if (lua_istable(L, -1))
+//             {
+//                 lua_getfield(L, -1, "name");
+//                 const char *name = luaL_checkstring(L, -1);
+//                 lua_pop(L, 1);
+//                 lua_getfield(L, -1, "value");
+//                 const char *value = luaL_optstring(L, -1, "");
+//                 lua_pop(L, 1);
+//                 lua_getfield(L, -1, "filename");
+//                 const char *filename = luaL_optstring(L, -1, "");
+//                 lua_pop(L, 1);
+//                 lua_getfield(L, -1, "contentType");
+//                 const char *contentType = luaL_optstring(L, -1, "");
+//                 lua_pop(L, 1);
+//                 lua_getfield(L, -1, "isFile");
+//                 bool isFile = lua_toboolean(L, -1);
+//                 lua_pop(L, 1);
+//                 params.push_back({name, value, filename, contentType, isFile});
+//             }
+//             lua_pop(L, 1); // removes value
+//         }
+//     }
 
-    int id = asyncHttp.StartRequest(method, url, params, referer);
-    lua_pushinteger(L, id);
-    return 1;
-}
+//     int id = asyncHttp.StartRequest(method, url, params, referer);
+//     lua_pushinteger(L, id);
+//     return 1;
+// }
 
-int LuaNatives::native_http_is_complete(lua_State *L)
-{
-    int id = luaL_checkinteger(L, 1);
-    bool isComplete = asyncHttp.IsRequestComplete(id);
-    lua_pushboolean(L, isComplete);
-    return 1;
-}
+// int LuaNatives::native_http_is_complete(lua_State *L)
+// {
+//     int id = luaL_checkinteger(L, 1);
+//     bool isComplete = asyncHttp.IsRequestComplete(id);
+//     lua_pushboolean(L, isComplete);
+//     return 1;
+// }
 
-int LuaNatives::native_http_get_result(lua_State *L)
-{
-    int id = luaL_checkinteger(L, 1);
-    auto [status, response] = asyncHttp.GetRequestResult(id);
+// int LuaNatives::native_http_get_result(lua_State *L)
+// {
+//     int id = luaL_checkinteger(L, 1);
+//     auto [status, response] = asyncHttp.GetRequestResult(id);
 
-    lua_pushinteger(L, status); // Push the HTTP status code
-    if (response)
-    {
-        lua_createtable(L, 0, 5); // Create table for response
-        // Header
-        lua_pushstring(L, response->header);
-        lua_setfield(L, -2, "header");
-        // Response body
-        lua_pushstring(L, response->response);
-        lua_setfield(L, -2, "body");
-        // Length of body
-        lua_pushinteger(L, response->response_len);
-        lua_setfield(L, -2, "body_len");
-        // Status Code
-        lua_pushinteger(L, response->response_code);
-        lua_setfield(L, -2, "status_code");
-        // Content type
-        lua_pushinteger(L, response->content_type);
-        lua_setfield(L, -2, "content_type");
-        return 2; // Return status code and response table
-    }
-    else
-    {
-        return 1; // Return status code if no response
-    }
-}
+//     lua_pushinteger(L, status); // Push the HTTP status code
+//     if (response)
+//     {
+//         lua_createtable(L, 0, 5); // Create table for response
+//         // Header
+//         lua_pushstring(L, response->header);
+//         lua_setfield(L, -2, "header");
+//         // Response body
+//         lua_pushstring(L, response->response);
+//         lua_setfield(L, -2, "body");
+//         // Length of body
+//         lua_pushinteger(L, response->response_len);
+//         lua_setfield(L, -2, "body_len");
+//         // Status Code
+//         lua_pushinteger(L, response->response_code);
+//         lua_setfield(L, -2, "status_code");
+//         // Content type
+//         lua_pushinteger(L, response->content_type);
+//         lua_setfield(L, -2, "content_type");
+//         return 2; // Return status code and response table
+//     }
+//     else
+//     {
+//         return 1; // Return status code if no response
+//     }
+// }
