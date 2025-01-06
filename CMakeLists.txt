@@ -36,7 +36,6 @@ set(BOT_SRC
     logger.cxx
     config_manager.cxx
     tick_sys.cxx
-    core.cxx
     lua_natives.cxx
     plugin_manager.cxx
     minor_scripts.cxx
