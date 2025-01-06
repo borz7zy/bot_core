@@ -7,6 +7,8 @@
 #include <memory>
 #include <csignal>
 #include <sstream>
+#include <algorithm>
+#include <cstring>
 
 #include "globals.hxx"
 #include "minor_scripts.hxx"
