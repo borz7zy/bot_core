@@ -34,20 +34,6 @@ git submodule init
 git submodule update --init --recursive
 ```
 
-#### Compiling the wolfssl library (required for tls connections in the https client)
-At the moment only PowerShell script is available. On MacOS and Linux you can install powershell, in the next updates I will add bash files.
-
-```PowerShell
-./prebuild-libs.ps1
-```
-
-By default, the Release version of wolfssl is built. If required, specify via the flag -buildtype "Debug".
-
-There are also the following flags:
-- -ccomp "compiler": specify the required compiler for C
-- -cppcomp "compiler": specify the required compiler for C++
-- -arch "architecture": specify the architecture for which the library should be compiled
-
 ### Build project
 ```
 mkdir build && cd build
@@ -65,17 +51,11 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 
 ### Build Instructions
 **Windows:**
-```powershell
-cmake --build .
 ```
-
-**Linux/MacOS:**
-```bash
-make
+cmake --build .
 ```
 
 ---
 
 ### Third-Party Libraries Used in the Project
 - [lua/lua](https://github.com/lua/lua)
-- [wolfSSL/wolfssl](https://github.com/wolfSSL/wolfssl)
