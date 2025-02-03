@@ -10,12 +10,10 @@
 #include <string>
 #include <memory>
 
-#define REGISTER_NATIVES_NAME "RegisterNatives"
-
 class LuaNatives
 {
 public:
-    void CallGetNatives(lua_State *L, void *plugin, const char *lib_name);
+    // void CallGetNatives(lua_State *L, void *plugin, const char *lib_name);
     void RegisterLuaNatives(lua_State *L);
 
 private:
@@ -30,4 +28,5 @@ private:
         {"print", native_print},
         {nullptr, nullptr}};
 };
+
 #endif

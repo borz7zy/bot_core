@@ -41,8 +41,6 @@ std::string plPath;
 std::vector<std::string> minorScripts;
 std::string mainScript;
 
-PluginManager pluginManager;
-
 void preloadStates(const char *script);
 lua_State *getStateFromVector(const char *script);
 
@@ -52,7 +50,6 @@ LuaNatives luaNatives;
 
 uint8_t ticks;
 
-void callUpdatePlugin(void *plugin);
 void callUpdateInScript(const char *script);
 
 void tick_update();

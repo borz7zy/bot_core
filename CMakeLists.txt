@@ -33,6 +33,7 @@ set(BOT_SRC
     src/plugin_manager.cxx
     src/minor_scripts.cxx
     src/main_script.cxx
+    src/plugins_sdk.cxx
 )
 
 add_executable(bot_core ${BOT_SRC})

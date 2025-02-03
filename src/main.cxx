@@ -1,5 +1,8 @@
 #include "main.hxx"
 
+// register classes
+PluginManager pluginManager;
+
 int main()
 {
     std::signal(SIGINT, signalHandler);
@@ -40,14 +43,13 @@ int main()
 
     pluginManager.LoadPlugins(plPath);
 
-    loadedLibraries = pluginManager.GetLoadedLibraries();
+    // loadedLibraries = pluginManager.GetLoadedLibraries();
+
+    pluginManager.RunPlugins();
 
     for (const auto &stateInfo : luaStates)
     {
-        for (const auto &[plugin, name] : loadedLibraries)
-        {
-            luaNatives.CallGetNatives(stateInfo.L, plugin, name.c_str());
-        }
+        pluginManager.RegisterNatives(stateInfo.L);
 
         luaNatives.RegisterLuaNatives(stateInfo.L);
     }
@@ -137,41 +139,6 @@ void loadMain(lua_State *L)
     mScript.load(L, mainScript.c_str());
 }
 
-void callUpdatePlugin(void *plugin)
-{
-    typedef void (*VoidFunction)();
-    VoidFunction func = nullptr;
-
-#ifdef _WIN32
-    HMODULE hModule = static_cast<HMODULE>(plugin);
-    func = (VoidFunction)GetProcAddress(hModule, "update_ticks");
-
-    if (!func)
-    {
-        int errorCode = static_cast<int>(GetLastError());
-        LPVOID lpMsgBuf;
-        FormatMessage(
-            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-            NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            (LPTSTR)&lpMsgBuf, 0, NULL);
-        logp->printlf("Failed to get function address: %d - %s", errorCode, (char *)lpMsgBuf);
-        LocalFree(lpMsgBuf);
-        return;
-    }
-#else
-    func = (VoidFunction)dlsym(plugin, "update_ticks");
-
-    const char *dlsym_error = dlerror();
-    if (dlsym_error)
-    {
-        logp->printlf("Failed to get function address: %s", dlsym_error);
-        return;
-    }
-#endif
-
-    func();
-}
-
 void preloadStates(const char *script)
 {
     lua_State *L = luaL_newstate();
@@ -255,10 +222,7 @@ void callUpdateInScript(const char *script)
 
 void tick_update()
 {
-    for (const auto &[plugin, name] : loadedLibraries)
-    {
-        callUpdatePlugin(plugin);
-    }
+    pluginManager.CallUpdateFunction();
 
     callUpdateInScript(mainScript.c_str());
 
