@@ -148,19 +148,7 @@ void preloadStates(const char *script)
         return;
     }
 
-    luaL_requiref(L, "string", luaopen_string, 1);
-    lua_pop(L, 1);
-
-    luaL_requiref(L, "math", luaopen_math, 1);
-    lua_pop(L, 1);
-
-    luaL_requiref(L, "table", luaopen_table, 1);
-    lua_pop(L, 1);
-
-#ifdef DEBUG
-    luaL_requiref(L, "debug", luaopen_debug, 1);
-    lua_pop(L, 1);
-#endif
+    luaL_openlibs(L);
 
     LuaStateInfo stateInfo;
     stateInfo.L = L;

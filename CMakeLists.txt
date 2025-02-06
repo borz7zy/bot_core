@@ -18,7 +18,9 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_definitions(-DRELEASE)
 endif()
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
+#macos
+#       export MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d'.' -f1-2)
+set(LUAJIT_LIB ${CMAKE_CURRENT_SOURCE_DIR}/libs/third_party/luajit/src/libluajit.a)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/compiler)
 
@@ -36,8 +38,9 @@ set(BOT_SRC
     src/plugins_sdk.cxx
 )
 
-add_executable(bot_core ${BOT_SRC})
-target_include_directories(bot_core PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/libs/third_party/lua
+add_executable(${PROJECT_NAME} ${BOT_SRC})
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/libs/third_party/luajit/src
 )
-target_link_libraries(bot_core PRIVATE lua::lib lua::header)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE ${LUAJIT_LIB})

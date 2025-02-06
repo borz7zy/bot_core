@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include "./../src/global_sdk.hxx"
-#include "./../src/globals.hxx"
+#include "../src/global_sdk.hxx"
+#include "../src/globals.hxx"
 
 int writer(lua_State *L, const void *p, size_t sz, void *ud)
 {
@@ -27,18 +27,17 @@ void compileLuaScript(lua_State *L, const std::string &scriptName, const std::st
         return;
     }
 
-    if (lua_dump(L, writer, &outputFile, 0) != 0)
+    if (lua_dump(L, writer, &outputFile) != 0)
     {
         std::cerr << "Error while dumping bytecode!" << std::endl;
     }
 
     outputFile.close();
-    std::cout << "Script " << scriptName << " compiled in " << outputFilePath << std::endl;
+    std::cout << "Script " << scriptName << " compiled to " << outputFilePath << std::endl;
 }
 
 int main(int argc, char *argv[])
 {
-
     std::string inputFile;
     std::string outputFile;
     bool debug = false;
@@ -47,52 +46,43 @@ int main(int argc, char *argv[])
     {
         std::string arg = argv[i];
 
-        if (arg.substr(0, 2) == "-i")
+        if (arg == "-i" && i + 1 < argc)
         {
-            inputFile = arg.substr(2);
+            inputFile = argv[++i];
         }
-        else if (arg.substr(0, 2) == "-o")
+        else if (arg == "-o" && i + 1 < argc)
         {
-            outputFile = arg.substr(2);
+            outputFile = argv[++i];
         }
         else if (arg == "-d")
         {
             debug = true;
         }
-    }
-
-    if (!inputFile.empty() && !outputFile.empty())
-    {
-        lua_State *L = luaL_newstate();
-        if (L == nullptr)
+        else
         {
-            std::cerr << "Error creating Lua state!" << std::endl;
+            std::cerr << "Unknown argument: " << arg << std::endl;
             return 1;
         }
-
-        luaL_requiref(L, "string", luaopen_string, 1);
-        lua_pop(L, 1);
-
-        luaL_requiref(L, "math", luaopen_math, 1);
-        lua_pop(L, 1);
-
-        luaL_requiref(L, "table", luaopen_table, 1);
-        lua_pop(L, 1);
-
-        if (debug)
-        {
-            luaL_requiref(L, "debug", luaopen_debug, 1);
-            lua_pop(L, 1);
-        }
-
-        compileLuaScript(L, inputFile, outputFile);
-
-        lua_close(L);
     }
-    else
+
+    if (inputFile.empty() || outputFile.empty())
     {
-        std::cerr << "The compiler accepts the following arguments: -i (input file) -o (output file). -d argument (include standard lua debug headers (requires debug version of bot core))!" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " -i <input_file> -o <output_file> [-d]" << std::endl;
         return 1;
     }
+
+    lua_State *L = luaL_newstate();
+    if (L == nullptr)
+    {
+        std::cerr << "Error creating Lua state!" << std::endl;
+        return 1;
+    }
+
+    luaL_openlibs(L);
+
+    compileLuaScript(L, inputFile, outputFile);
+
+    lua_close(L);
+
     return 0;
 }

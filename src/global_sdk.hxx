@@ -15,10 +15,10 @@
 
 extern "C"
 {
-#include "lauxlib.h"
-#include "lua.h"
-#include "luaconf.h"
-#include "lualib.h"
+#include <lauxlib.h>
+#include <lua.h>
+#include <luaconf.h>
+#include <lualib.h>
 }
 
 typedef int (*IntFunctionPtr)(lua_State *L);

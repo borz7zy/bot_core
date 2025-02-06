@@ -1,3 +1,6 @@
 [submodule "libs/third_party/wolfssl"]
 	path = libs/third_party/wolfssl
 	url = https://github.com/wolfSSL/wolfssl.git
+[submodule "libs/third_party/luajit"]
+	path = libs/third_party/luajit
+	url = https://luajit.org/git/luajit.git
